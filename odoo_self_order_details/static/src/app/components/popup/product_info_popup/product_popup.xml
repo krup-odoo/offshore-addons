@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="odoo_self_order_details.ProductPopup" owl="1">
+        <div class="self_order_prodpopup o_dialog " t-att-id="id">
+            <div role="dialog" class="modal d-block" tabindex="-1">
+                <div class="modal-dialog" role="document" t-on-click.stop="" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: auto; width: 80%;">
+                    <div class="modal-content rounded" style="max-height: 90vh;max-width:85%;">
+                        <div class="modal-header">
+                                <div class="row justify-content-center mt-3">
+                                    <div class="ratio ratio-1x1 w-25 w-sm-50 w-md-50" t-att-class="{'d-md-block': !props.product.has_image}">
+                                        <div class="placeholder-glow o_self_order_item_card_no_image">
+                                            <div t-attf-class="{{ props.product.has_image ? 'placeholder' : 'd-flex align-items-center justify-content-center h-100' }} bg-200 w-100 h-100 rounded">
+                                                <span t-if="!props.product.has_image" t-esc="props.product.name" class="text-center text-white fs-2 fw-bold mb-1 mb-sm-2"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scroll-container" style="overflow-y: scroll; max-height: calc(90vh - 170px);padding-right: 5px;"> <!-- Added scroll-container class and overflow-y -->
+                                    <div class="d-flex flex-column ">
+                                    <img t-if="props.product.has_image" class="o_self_order_item_card_image w-100 rounded" t-attf-src="/menu/get-image/{{ props.product.id }}/512?unique={{props.product.write_date}}"
+                                        alt="Product image" loading="lazy" onerror="this.remove()"/>
+                                        </div>
+                                    <h1 class="modal-title fw-bolder" t-esc="props.product.name"/>
+                                    <h2>Product Description:</h2>
+                                    <div class="modal-body o_self_order_main_desc fs-3 p-4 ps-5" t-out="props.product.description_self_order"/>
+                                </div>
+                            </div>
+                        <div class="modal-footer d-flex flex-row-reverse justify-content-between align-items-center">
+                            <button type="button" class="btn btn-primary" t-on-click.stop="() => this.addToCartAndClose()">Order</button>
+                            <button class="btn btn-secondary" type="button" t-on-click.stop="() => this.props.close()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
