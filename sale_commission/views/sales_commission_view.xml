@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="sales_commissions_view_tree" model="ir.ui.view">
+        <field name="name">sales.commissions.tree</field>
+        <field name="model">sales.commissions</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="date"/>
+                <field name="sales_person_id"/>
+                <field name="sales_team_id"/>
+                <field name="invoice_id" string="Invoice"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="amount"/>
+            </tree>
+        </field>
+    </record>
+    <record id="sales_commissions_view_search" model="ir.ui.view">
+        <field name="name">sales.commissions.search</field>
+        <field name="model">sales.commissions</field>
+        <field name="arch" type="xml">
+            <search string="Commissions">
+                <filter  name="name" string="My Commissions"/>
+                <separator/>
+                <filter name="date" string="Date"/>
+                <field name="date"/>
+                <field name="sales_person_id"/>
+                <field name="sales_team_id"/>
+                <group string="Group By">
+                    <filter string="Date" name="date" domain="[]" context="{'group_by':'date'}"/>
+                    <filter string="Sales Team" name="sales_team_id" domain="[]" context="{'group_by':'sales_team_id'}"/>
+                    <filter string="Sales Person" name="sales_person_id" domain="[]" context="{'group_by':'sales_person_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="sales_commissions_view_graph" model="ir.ui.view">
+        <field name="name">sales.commissions.graph</field>
+        <field name="model">sales.commissions</field>
+        <field name="arch" type="xml">
+            <graph string="Commissions Graph" type="bar">
+                <field name="sales_person_id" type="column"/>
+                <field name="date" type="row"/>
+            </graph>
+        </field>
+    </record>
+    <record id="sales_commissions_view_pivot" model="ir.ui.view">
+        <field name="name">sales.commissions.pivot</field>
+        <field name="model">sales.commissions</field>
+        <field name="arch" type="xml">
+            <pivot string="Commissions ">
+                <field name="date" type="row"/>
+                <field name="sales_team_id" type="column"/>
+                <field name="sales_person_id" type="column"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="sales_commissions_reporting" model="ir.actions.act_window">
+        <field name="name">Commissions</field>
+        <field name="res_model">sales.commissions</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
+        <field name="context">{'search_default_available':True}</field>
+    </record>
+</odoo>

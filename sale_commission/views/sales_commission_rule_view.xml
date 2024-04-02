@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="sales_commissions_rule_view_tree" model="ir.ui.view">
+        <field name="name">sales.commissions.rule.tree</field>
+        <field name="model">sales.commissions.rule</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence" widget="handle"/>
+                <field name="due_at"/>
+                <field name="commission_rate"/>
+                <field name="commission_for" invisible="0"/>
+                <field name="condition"/>
+            </tree>
+        </field>
+    </record>
+    <record id="sales_commissions_rule_view_form" model="ir.ui.view">
+        <field name="name">sales.commissions.rule.form</field>
+        <field name="model">sales.commissions.rule</field>
+        <field name="arch" type="xml">
+            <form string="Commission Rule">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="commission_rate"/>
+                        </group>
+                        <group>
+                            <field name="commission_for" widget="selection"/>
+                        </group>
+                        <group>
+                            <field name="due_at"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Apply on">
+                            <group>
+                                <group>
+                                    <field name="product_category_id" placeholder="All"/>
+                                    <field name="product_id" placeholder="All"/>
+                                    <field name="product_expired"/>
+                                    <field name="max_discount"/>
+                                </group>
+                                <group>
+                                    <group>
+                                        <field name="on_fast_payment"/>
+                                    </group>
+                                    <group>
+                                        <field name="before_days" invisible="not on_fast_payment"/>
+                                    </group>
+                                    <group>
+                                        <field name="sales_person_id" placeholder="All" invisible="commission_for not in ['salesperson']"/>
+                                        <field name="sales_team_id" placeholder="All" invisible="commission_for not in ['salesteam']"/>
+                                    </group>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="sales_commissions_rule" model="ir.actions.act_window">
+        <field name="name">Commission Rules</field>
+        <field name="res_model">sales.commissions.rule</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
