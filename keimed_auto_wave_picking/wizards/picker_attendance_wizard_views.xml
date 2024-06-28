@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="picker_attendance_wizard_view_form" model="ir.ui.view">
+        <field name="name">picker.attendance.wizard.view.form</field>
+        <field name="model">picker.attendance.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Picker Attendance Wizard">
+                <group>
+                    <group>
+                        <field name="user_id" />
+                        <field name="picking_type" invisible="1"/>
+                        <field name="snake_picking_type" invisible="1"/>
+                        <field name="location_id" readonly="picker_attandance_id" invisible="picking_type == 'snake_picking'" domain = "[
+                        ('usage', '=', 'internal'),
+                        ('child_ids', '=', False),
+                        '|',
+                        '|',
+                        ('is_zone', '=', True),
+                        ('is_rack', '=', True),
+                        ('picking_type', '!=', 'snake_picking')]" context="{'display_only_current_location_name': True}" />
+                        <field name="location_id" readonly="picker_attandance_id" invisible="picking_type != 'snake_picking' or snake_picking_type != 'zone'" domain="[('usage', '=', 'internal'), ('child_ids', '=', False), ('company_id.picking_type', '=', 'snake_picking'), ('company_id.snake_picking_type', '=', 'zone'), ('is_zone', '=', True)]" context="{'display_only_current_location_name': True}" />
+                        <field name="location_id" readonly="picker_attandance_id" invisible="picking_type != 'snake_picking' or snake_picking_type != 'rack'" domain="[('usage', '=', 'internal'), ('child_ids', '=', False), ('company_id.picking_type', '=', 'snake_picking'), ('company_id.snake_picking_type', '=', 'rack'), ('is_rack', '=', True)]" context="{'display_only_current_location_name': True}" />
+                        <field name="checkin_date" invisible="not picker_attandance_id" readonly="picker_attandance_id" />
+                        <field name="company_id" />
+                        <field name="picker_attandance_id" invisible="1" />
+                    </group>
+                </group>
+                <footer>
+                    <button string="Check In" name="action_check_in" type="object" class="btn-primary" invisible="picker_attandance_id" />
+                    <button string="Check Out" name="action_check_out" type="object" class="btn-primary" invisible="not picker_attandance_id" />
+                    <button string="Check Out &amp; Check In Again" name="action_check_out_and_check_in_again" type="object" invisible="not picker_attandance_id" />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="stock_picking_type_kanban_inherit_id" model="ir.ui.view">
+        <field name="name">stock.picking.type.kanban.inherit</field>
+        <field name="model">stock.picking.type</field>
+        <field name="inherit_id" ref="stock.stock_picking_type_kanban" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='color']" position="before">
+                <header>
+                    <button name="action_check_in_or_check_out" string="Check In/ Check Out" type="object" class="btn-primary" display="always" groups="keimed_auto_wave_picking.group_stock_picking_picker" />
+                </header>
+            </xpath>
+            <xpath expr="//div[hasclass('col-6','o_kanban_card_manage_section','o_kanban_manage_new')]" position="inside">
+                <div role="menuitem" t-if="record.name.raw_value == 'Pick'">
+                    <a name="pick_line_action_button" type="object">Picklist</a>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

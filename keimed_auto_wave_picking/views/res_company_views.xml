@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_picking_type" model="ir.ui.view">
+        <field name="name">res.company.inherit</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='color']" position="after">
+                <field name="picking_type" required="True" widget='radio' />
+                <field name="snake_picking_type" required="picking_type == 'snake_picking'" invisible="picking_type != 'snake_picking'" widget='radio' />
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="x2ManyFieldSearchTemplate" t-inherit="web.X2ManyField" t-inherit-mode="primary" owl="1">
+        <t t-if="displayControlPanelButtons" position="replace">
+            <div tabindex="-1">
+                <div class="container">
+                    <div class="row p-0">
+                        <div class="w-auto p-0">
+                            <input type="text"
+                                   class="o_searchview_input o_input mt-2 rounded-pill border border-2 p-3"
+                                   placeholder="Search..."
+                                   t-ref="search_keyword"
+                                   t-on-keyup="onInputKeyUp"
+                                   style="height: 30px;"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </t>
+</templates>

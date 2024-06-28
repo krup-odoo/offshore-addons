@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="groupby_filter_wizard_view_form" model="ir.ui.view">
+        <field name="name">groupby.filter.wizard.view.form</field>
+        <field name="model">groupby.filter.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group string="Group By">
+                        <field name="group_by_sequence" invisible="1" />
+                        <field name="group_by_contact" string="Contact" />
+                        <field name="group_by_customer_category" string="Customer Category" />
+                        <field name="group_by_product_category" string="Product Category" />
+                        <field name="group_by_routes" string="Routes" />
+                        <field name="group_by_movement_type" string="Movement Type" />
+                        <field name="group_by_priority" string="Priority" />
+                        <field name="group_by_location" string="Location" />
+                    </group>
+                    <group string="Filter By">
+                        <field name="filter_by_contact" string="Contact" />
+                        <field name="filter_by_customer_category" string="Customer Category" />
+                        <field name="filter_by_product_category" string="Product Category" />
+                        <field name="filter_by_routes" string="Routes" />
+                        <field name="filter_by_movement_type" string="Movement Type" />
+                        <field name="filter_by_priority" string="Priority" />
+                        <field name="filter_by_scheduled_date" string="Scheduled Date" />
+                        <field name="filter_order_ids" invisible="1"/>
+                        <field name="filter_by_sale_order" options="{'no_create': True}" widget="many2many_tags" string="Sales Order" domain="[('id', 'in', filter_order_ids)]" />
+                    </group>
+                </group>
+                <footer>
+                    <button string="Apply Filters/ Group By" name="apply_filters_and_group_by" type="object" class="btn-primary" />
+                    <button string="Cancel" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

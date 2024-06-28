@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="split_wave_wizard_view_form" model="ir.ui.view">
+        <field name="name">split.wave.wizard.view.form</field>
+        <field name="model">split.wave.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Split into waves">
+                <group>
+                    <group>
+                        <field name="wave_based_on" invisible="1" />
+                        <field name="no_of_lines_to_be_picked" />
+                        <field name="max_lines_per_wave" invisible="wave_based_on != 'max_no_of_lines'" />
+                        <field name="no_of_waves_to_be_created" invisible="wave_based_on != 'max_no_of_wave'" />
+                    </group>
+                    <group>
+                        <field name="wave_based_on" widget="radio" options="{'horizontal': true}" required="1" />
+                        <field name="scheduled_date" />
+                        <field name="user_id" options="{'no_create': True}" />
+                    </group>
+                </group>
+                <footer>
+                    <button name="attach_pickings" string="Create Waves" type="object" class="btn-primary" />
+                    <button string="Discard" special="cancel" data-hotkey="x" class="btn-secondary" />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_picking_type_location" model="ir.ui.view">
+        <field name="name">stock.location.inherit</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='replenish_location']" position="after">
+                <field name="picking_type" invisible="1" />
+                <field name="snake_picking_type" invisible="1" />
+                <field name="is_zone" invisible="usage!='internal' or picking_type != 'snake_picking' or snake_picking_type != 'zone'" />
+                <field name="is_rack" invisible="usage!='internal' or picking_type != 'snake_picking' or snake_picking_type != 'rack'" />
+            </xpath>
+        </field>
+    </record>
+</odoo>

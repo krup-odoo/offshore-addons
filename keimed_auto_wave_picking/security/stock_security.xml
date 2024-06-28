@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="group_stock_picking_picker" model="res.groups">
+            <field name="name">Is a Picker</field>
+            <field name="category_id" ref="base.module_category_hidden" />
+        </record>
+        <record id="group_stock_picking_checker" model="res.groups">
+            <field name="name">Is a Checker</field>
+            <field name="category_id" ref="base.module_category_hidden" />
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="inherit_view_id_stock_move_line_1" model="ir.ui.view">
+        <field name="name">stock.move.line.view.tree.inherit</field>
+        <field name="model">stock.move.line</field>
+        <field name="mode">primary</field>
+        <field name="priority">15</field>
+        <field name="arch" type="xml">
+            <tree>
+                <header>
+                    <button name="action_group_by_filter" string="Group by/Filter by" type="object" display="always" />
+                    <button name="action_create_snake_pickings" string="Create Snake Picking" type="object" />
+                    <button name="generate_pickings" string="Generate Picklist" type="object" />
+                    <button name="action_split_waves" string="Split into waves" type="object" />
+                </header>
+                <field name='product_id' />
+                <field name='quantity' />
+                <field name='picking_partner_id' string="Customer" />
+                <field name='route_id' />
+                <field name='product_category_name' />
+                <field name='picking_id' />
+                <field name='movement_type_id' />
+                <field name="batch_id" optional="hide" />
+                <field name='origin' string="Source Document" />
+            </tree>
+        </field>
+    </record>
+    <record id="inherit_view_id_inherit_module_name" model="ir.ui.view">
+        <field name="name">stock.move.line.view.inherit.search</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock.stock_move_line_view_search" />
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='outgoing']" position="before">
+                <filter string="To Do" name="batch" domain="[('batch_id', '=', False)]" />
+            </xpath>
+        </field>
+    </record>
+</odoo>
