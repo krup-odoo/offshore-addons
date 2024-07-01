@@ -27,6 +27,7 @@
         'views/res_company_views.xml',
         'views/stock_location_views.xml',
         'wizards/picker_attendance_wizard_views.xml',
+        'wizards/stock_move_lines_wizard_view.xml',
 
         'views/stock_picking_type.xml',
         'views/pick_line_view.xml',
