@@ -188,7 +188,8 @@ class KeimedStockMove(models.Model):
                 ], order='id desc', limit=1)
                 if picker_attendance:
                     picker = picker_attendance.user_id
-            rec.picker_id = picker
+            if rec.company_id.picking_type != 'snake_picking' or rec.company_id.snake_picking_type != 'zone':
+                rec.picker_id = picker
 
     @api.onchange('to_do')
     def on_change_to_do(self):
@@ -199,9 +200,24 @@ class KeimedStockMove(models.Model):
             self.picked = False
 
     def picked_button_action(self):
-        if self.keimed_wave_id.is_snake_picking_wave and self.picker_id != self.env.user:
+        picker_attendances = self.env['picker.attendance'].search([
+                        ('location_id', '=', self.location_id.id),
+                        ('company_id', '=', self.company_id.id),
+                        ('checkin_date', '!=', False),
+                        ('checkout_date', '=', False),
+                    ])
+        user_ids = [record.user_id.id for record in picker_attendances]
+        print(user_ids)
+        if self.keimed_wave_id.is_snake_picking_wave and self.picker_id and self.picker_id.id != self.env.user.id:
+            raise ValidationError(
+                _('You can not pick this product. %s is picking this product.', self.picker_id.name))
+        elif self.keimed_wave_id.is_snake_picking_wave and self.env.user.id not in user_ids:
             raise ValidationError(
                 _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
+        if self.keimed_wave_id.is_snake_picking_wave:
+            locations = self.keimed_wave_id.move_ids.filtered(lambda move: move.location_id.id == self.location_id.id)
+            for loc in locations:
+                loc.picker_id = self.env.user
         self.write({
             'picked': True,
             'to_do': 0,
