@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_move_lines_wizard_view_form" model="ir.ui.view">
+        <field name="name">stock.move.lines.wizard.view.form</field>
+        <field name="model">stock.move.lines.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="stock_move_line_ids">
+                    <tree editable="top" create="0" delete="0" no_open="1">
+                        <field name="product_id" readonly="context.get('operation_type') in ['detailed_operation', 'operation']"/>
+                        <field name="location_id" readonly="context.get('operation_type') in ['detailed_operation', 'operation']"/>
+                        <field name="location_dest_id" readonly="context.get('operation_type') in ['detailed_operation', 'operation']"/>
+                        <field name="quantity_product_uom" readonly="context.get('operation_type') in ['detailed_operation', 'operation']"/>
+                        <field name="quantity" readonly="context.get('operation_type') in ['detailed_operation', 'operation']"/>
+                        <field name="lot_id" readonly="context.get('operation_type') == 'detailed_operation'"/>
+                        <field name="company_id" readonly="context.get('operation_type') in ['detailed_operation', 'operation']"/>
+                        <field name="to_do" readonly="context.get('operation_type') == 'detailed_operation'"/>
+                        <field name="note" readonly="context.get('operation_type') in ['detailed_operation', 'operation']"/>                        
+                    </tree>
+                </field>
+            </form>
+        </field>
+    </record>
+    <record id="action_stock_move_line" model="ir.actions.act_window">
+        <field name="name">stock.move.lines.wizard</field>
+        <field name="res_model">stock.move.lines.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="stock_move_lines_wizard_view_form" />
+        <field name="target">new</field>
+    </record>
+</odoo>

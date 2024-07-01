@@ -85,6 +85,28 @@ class StockMoveLine(models.Model):
             'context': {'default_no_of_lines_to_be_picked': len(self)},
         }
 
+<<<<<<< HEAD
+=======
+    def create_keimed_stock_move(self, move):
+        return self.env['keimed.stock.move'].create({
+            'move_id': move.id,
+            'location_id': move.location_id.id,
+            'location_dest_id': move.location_dest_id.id,
+            'stock_move_line_ids': [Command.link(id) for id in self.ids],
+            'move_line_ids': [Command.create({
+                'move_line_id': line.id,
+                'company_id': line.company_id.id,
+                'product_id': line.product_id.id,
+                'quantity': line.quantity,
+                'lot_id': line.lot_id.id,
+                'package_id': line.package_id.id,
+                'result_package_id': line.result_package_id.id,
+                'location_id': line.location_id.id,
+                'location_dest_id': line.location_dest_id.id,
+            }) for line in self]
+        })
+
+>>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
     def _add_to_keimed_wave(self):
         wave = self.env['keimed.wave'].create({
             'picker_id': self._context.get('active_owner_id'),

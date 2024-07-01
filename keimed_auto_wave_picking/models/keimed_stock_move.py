@@ -12,11 +12,15 @@ class KeimedStockMove(models.Model):
     _description = 'Keimed Stock Move'
 
     move_ids = fields.Many2many('stock.move', required=True)
+<<<<<<< HEAD
     stock_move_line_ids = fields.Many2many('stock.move.line')
+=======
+>>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
     keimed_wave_id = fields.Many2one(
         'keimed.wave', string='Keimed Wave')
     keimed_wave_state = fields.Selection(related='keimed_wave_id.state')
     company_id = fields.Many2one(
+<<<<<<< HEAD
         'res.company', string='Company', required=True)
     product_id = fields.Many2one(
         'product.product', string='Product', required=True, index=True)
@@ -25,6 +29,17 @@ class KeimedStockMove(models.Model):
         default=0, required=True,
         help="This is the quantity of product that is planned to be moved.")
     product_uom = fields.Many2one('uom.uom', string='UoM', required=True)
+=======
+    'res.company', string='Company', compute='_compute_company_id', store=True)
+    product_id = fields.Many2one(
+    'product.product', string='Product', compute='_compute_product_id', store=True)
+    product_uom_qty = fields.Float(
+        string='Demand',
+        digits='Product Unit of Measure', default=0, required=True,
+        help="This is the quantity of product that is planned to be moved.")
+    product_uom = fields.Many2one(
+        string='UoM', required=True)
+>>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
     product_uom_category_id = fields.Many2one(
         related='product_id.uom_id.category_id')
 
@@ -55,7 +70,14 @@ class KeimedStockMove(models.Model):
         'Picked', copy=False,
         help="This checkbox is just indicative, it doesn't validate or generate any product moves.")
 
+<<<<<<< HEAD
     price_unit = fields.Float(string='Unit Price', copy=False)
+=======
+    price_unit = fields.Float(
+        string='Unit Price', copy=False)
+    origin = fields.Char(related='move_ids.origin', string='Source Document')
+    move_line_ids = fields.One2many('keimed.stock.move.line', 'keimed_move_id')
+>>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
     has_tracking = fields.Selection(
         related='product_id.tracking', string='Product with Tracking')
     quantity = fields.Float(
@@ -85,13 +107,41 @@ class KeimedStockMove(models.Model):
         'res.users', compute='_compute_picker', store=True, copy=False,
         index=True)
     note = fields.Text(string='Note')
+    stock_move_line_ids = fields.Many2many('stock.move.line')
 
+    @api.depends('move_ids')
+    def _compute_company_id(self):
+        for record in self:
+            if record.move_ids:
+                record.company_id = record.move_ids[0].company_id
+
+    @api.depends('move_ids')
+    def _compute_product_id(self):
+        for record in self:
+            if record.move_ids:
+                record.product_id = record.move_ids[0].product_id
+
+<<<<<<< HEAD
     @api.depends('stock_move_line_ids.quantity')
     def _compute_quantity(self):
         for move in self:
             move.quantity = sum(move.stock_move_line_ids.mapped('quantity'))
 
     @api.depends('stock_move_line_ids.lot_id', 'stock_move_line_ids.quantity')
+=======
+    @api.depends('product_id')
+    def _compute_product_uom(self):
+        for move in self:
+            move.product_uom = move.product_id.uom_id.id
+    
+    @api.depends('stock_move_line_ids.quantity')
+    def _compute_quantity(self):
+        for move in self:
+            total_quantity = sum(move.stock_move_line_ids.mapped('quantity'))
+            move.quantity = total_quantity
+
+    @api.depends('move_line_ids.lot_id', 'move_line_ids.quantity')
+>>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
     def _compute_lot_ids(self):
         for move in self:
             move.lot_ids = move.stock_move_line_ids.mapped('lot_id')
@@ -190,6 +240,7 @@ class KeimedStockMove(models.Model):
             'to_do': 0.0
         })
 
+<<<<<<< HEAD
     def show_stock_move_lines(self):
         return {
             "type": "ir.actions.act_window",
@@ -219,3 +270,25 @@ class KeimedStockMove(models.Model):
     def action_reject_unlink(self):
         self.ensure_one()
         self.keimed_wave_id = self.stock_move_line_ids.mapped('keimed_wave_id')
+=======
+        # move_lines = self.keimed_wave_id.move_line_ids.filtered(
+        #     lambda x: x.move_id == self and not x.picked)
+        # if move_lines:
+        #     move_lines.write({
+        #         'picked': True
+        #     })
+
+    def show_stock_move_lines(self):
+        operation_type = 'detailed_operation' if self.env.context.get('detailed_operation') else 'operation'
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Stock Move Lines",
+            "res_model": "stock.move.lines.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                'default_stock_move_line_ids': self.stock_move_line_ids.ids,
+                'operation_type': operation_type
+        }
+    }
+>>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
