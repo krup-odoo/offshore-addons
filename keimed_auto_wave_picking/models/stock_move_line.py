@@ -94,6 +94,7 @@ class StockMoveLine(models.Model):
             'move_id': move.id,
             'location_id': move.location_id.id,
             'location_dest_id': move.location_dest_id.id,
+            'stock_move_line_ids': [Command.link(id) for id in self.ids],
             'move_line_ids': [Command.create({
                 'move_line_id': line.id,
                 'company_id': line.company_id.id,

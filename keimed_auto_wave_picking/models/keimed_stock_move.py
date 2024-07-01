@@ -11,18 +11,20 @@ class KeimedStockMove(models.Model):
     _inherit = ['mail.thread']
     _description = 'Keimed Stock Move'
 
-    move_id = fields.Many2one('stock.move', required=True)
+    move_ids = fields.Many2many('stock.move', required=True)
     keimed_wave_id = fields.Many2one(
         'keimed.wave', string='Keimed Wave')
     keimed_wave_state = fields.Selection(related='keimed_wave_id.state')
-    company_id = fields.Many2one(related='move_id.company_id')
-    product_id = fields.Many2one(related='move_id.product_id')
+    company_id = fields.Many2one(
+    'res.company', string='Company', compute='_compute_company_id', store=True)
+    product_id = fields.Many2one(
+    'product.product', string='Product', compute='_compute_product_id', store=True)
     product_uom_qty = fields.Float(
-        related='move_id.product_uom_qty', string='Demand',
+        string='Demand',
         digits='Product Unit of Measure', default=0, required=True,
         help="This is the quantity of product that is planned to be moved.")
     product_uom = fields.Many2one(
-        related='move_id.product_uom', string='UoM', required=True)
+        string='UoM', required=True)
     product_uom_category_id = fields.Many2one(
         related='product_id.uom_id.category_id')
 
@@ -54,14 +56,14 @@ class KeimedStockMove(models.Model):
         help="This checkbox is just indicative, it doesn't validate or generate any product moves.")
 
     price_unit = fields.Float(
-        related='move_id.price_unit', string='Unit Price', copy=False)
-    origin = fields.Char(related='move_id.origin', string='Source Document')
+        string='Unit Price', copy=False)
+    origin = fields.Char(related='move_ids.origin', string='Source Document')
     move_line_ids = fields.One2many('keimed.stock.move.line', 'keimed_move_id')
     has_tracking = fields.Selection(
         related='product_id.tracking', string='Product with Tracking')
     quantity = fields.Float(
         'Quantity', compute='_compute_quantity',
-        digits='Product Unit of Measure', inverse='_set_quantity', store=True)
+        digits='Product Unit of Measure', store=True)
 
     product_type = fields.Selection(
         related='product_id.detailed_type', readonly=True)
@@ -88,44 +90,30 @@ class KeimedStockMove(models.Model):
     picker_id = fields.Many2one(
         'res.users', compute='_compute_picker', store=True, copy=False)
     note = fields.Text(string='Note')
+    stock_move_line_ids = fields.Many2many('stock.move.line')
+
+    @api.depends('move_ids')
+    def _compute_company_id(self):
+        for record in self:
+            if record.move_ids:
+                record.company_id = record.move_ids[0].company_id
+
+    @api.depends('move_ids')
+    def _compute_product_id(self):
+        for record in self:
+            if record.move_ids:
+                record.product_id = record.move_ids[0].product_id
 
     @api.depends('product_id')
     def _compute_product_uom(self):
         for move in self:
             move.product_uom = move.product_id.uom_id.id
-
-    def _quantity_sml(self):
-        self.ensure_one()
-        quantity = 0
-        for move_line in self.move_line_ids:
-            quantity += move_line.product_uom_id._compute_quantity(
-                move_line.quantity, self.product_uom, round=False)
-        return quantity
-
-    @api.depends('move_line_ids.quantity', 'move_line_ids.product_uom_id')
+    
+    @api.depends('stock_move_line_ids.quantity')
     def _compute_quantity(self):
-        """ This field represents the sum of the move lines `quantity`. It allows the user to know
-        if there is still work to do.
-
-        We take care of rounding this value at the general decimal precision and not the rounding
-        of the move's UOM to make sure this value is really close to the real sum.
-        """
-        move_lines_ids = set()
         for move in self:
-            move_lines_ids |= set(move.move_line_ids.ids)
-
-        data = self.env['keimed.stock.move.line']._read_group(
-            [('id', 'in', list(move_lines_ids))],
-            ['keimed_move_id', 'product_uom_id'], ['quantity:sum']
-        )
-        sum_qty = defaultdict(float)
-        for move, product_uom, qty_sum in data:
-            uom = move.product_uom
-            sum_qty[move.id] += product_uom._compute_quantity(
-                qty_sum, uom, round=False)
-
-        for move in self:
-            move.quantity = sum_qty[move.id]
+            total_quantity = sum(move.stock_move_line_ids.mapped('quantity'))
+            move.quantity = total_quantity
 
     @api.depends('move_line_ids.lot_id', 'move_line_ids.quantity')
     def _compute_lot_ids(self):
@@ -232,3 +220,17 @@ class KeimedStockMove(models.Model):
         #     move_lines.write({
         #         'picked': True
         #     })
+
+    def show_stock_move_lines(self):
+        operation_type = 'detailed_operation' if self.env.context.get('detailed_operation') else 'operation'
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Stock Move Lines",
+            "res_model": "stock.move.lines.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                'default_stock_move_line_ids': self.stock_move_line_ids.ids,
+                'operation_type': operation_type
+        }
+    }
