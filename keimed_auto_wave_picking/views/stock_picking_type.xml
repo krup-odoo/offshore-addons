@@ -7,7 +7,8 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='color']" position="before">
                 <header>
-                    <button name="action_check_in_or_check_out" string="Check In/ Check Out" type="object" class="btn-primary" display="always" groups="keimed_auto_wave_picking.group_stock_picking_picker" />
+                    <button name="action_check_in_or_check_out" string="Check In/ Check Out" type="object"
+                    class="btn-primary" display="always" groups="keimed_auto_wave_picking.group_stock_picking_picker" />
                 </header>
             </xpath>
             <xpath expr="//div[hasclass('col-6','o_kanban_card_manage_section','o_kanban_manage_new')]" position="inside">

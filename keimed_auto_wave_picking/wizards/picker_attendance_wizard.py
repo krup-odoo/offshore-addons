@@ -39,16 +39,17 @@ class PickerAttendanceWizard(models.TransientModel):
         return defaults
 
     def action_check_in(self):
-        picker_attandance = self.env['picker.attendance'].search([
-            ('user_id', '!=', self.env.user.id),
-            ('company_id', '=', self.env.company.id),
-            ('location_id', '=', self.location_id.id),
-            ('checkin_date', '!=', False),
-            ('checkout_date', '=', False),
-        ], order='id desc', limit=1)
-        if picker_attandance:
-            raise ValidationError(
-                _('%s is already checked in at this location!' % picker_attandance.user_id.name))
+        if not self.location_id.is_zone:
+            picker_attandance = self.env['picker.attendance'].search([
+                ('user_id', '!=', self.env.user.id),
+                ('company_id', '=', self.env.company.id),
+                ('location_id', '=', self.location_id.id),
+                ('checkin_date', '!=', False),
+                ('checkout_date', '=', False),
+            ], order='id desc', limit=1)
+            if picker_attandance:
+                raise ValidationError(
+                    _('%s is already checked in at this location!' % picker_attandance.user_id.name))
 
         self.env['picker.attendance'].create({
             'user_id': self.user_id.id,
