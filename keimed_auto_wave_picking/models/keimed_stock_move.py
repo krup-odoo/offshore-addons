@@ -96,13 +96,13 @@ class KeimedStockMove(models.Model):
     def _compute_company_id(self):
         for record in self:
             if record.move_ids:
-                record.company_id = record.move_ids[0].company_id
+                record.company_id = record.move_ids.company_id
 
     @api.depends('move_ids')
     def _compute_product_id(self):
         for record in self:
             if record.move_ids:
-                record.product_id = record.move_ids[0].product_id
+                record.product_id = record.move_ids.product_id
 
     @api.depends('product_id')
     def _compute_product_uom(self):
