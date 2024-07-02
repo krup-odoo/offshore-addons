@@ -93,23 +93,12 @@ class KeimedStockMove(models.Model):
     @api.depends('stock_move_line_ids.quantity')
     def _compute_quantity(self):
         for move in self:
-            total_quantity = sum(move.stock_move_line_ids.mapped('quantity'))
-            move.quantity = total_quantity
+            move.quantity = sum(move.stock_move_line_ids.mapped('quantity'))
 
     @api.depends('stock_move_line_ids.lot_id', 'stock_move_line_ids.quantity')
     def _compute_lot_ids(self):
-        domain = [
-            ('id', 'in', self.stock_move_line_ids.ids),
-            ('lot_id', '!=', False),
-            ('quantity', '!=', 0.0)
-        ]
-        lots_by_move = self.env['stock.move.line']._read_group(
-            domain,
-            ['move_id'], ['lot_id:array_agg']
-        )
-        lots_by_move_id = {group['move_id'][0]: group['lot_id'] for group in lots_by_move}
         for move in self:
-            move.lot_ids = lots_by_move_id.get(move._origin.id, [])
+            move.lot_ids = move.stock_move_line_ids.mapped('lot_id')
 
     @api.depends('has_tracking', 'state', 'product_id.detailed_type')
     def _compute_show_info(self):
