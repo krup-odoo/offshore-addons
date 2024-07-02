@@ -22,6 +22,7 @@ class KeimedStockMove(models.Model):
     company_id = fields.Many2one(
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         'res.company', string='Company', required=True)
     product_id = fields.Many2one(
         'product.product', string='Product', required=True, index=True)
@@ -35,8 +36,11 @@ class KeimedStockMove(models.Model):
 =======
         'res.company', string='Company', compute='_compute_company_id', store=True)
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+        'res.company', string='Company', store=True)
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
     product_id = fields.Many2one(
-        'product.product', string='Product', compute='_compute_product_id', store=True)
+        'product.product', string='Product', store=True)
     product_uom_qty = fields.Float(
         string='Demand',
         digits='Product Unit of Measure', default=0, required=True,
@@ -106,10 +110,14 @@ class KeimedStockMove(models.Model):
         "stock.quant.package", string='Basket No.',
         compute='_compute_basket_number', inverse='_inverse_basket_number',
 <<<<<<< HEAD
+<<<<<<< HEAD
         store=True, copy=False, readonly=False, index=True)
 =======
         store=True, coS00044py=False, readonly=False)
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+        store=True, copy=False, readonly=False)
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
     to_do = fields.Float(
         string='To-Do', compute='_compute_to_do', store=True, copy=False)
     to_do_change_count = fields.Integer(string='To-do count')
@@ -120,6 +128,7 @@ class KeimedStockMove(models.Model):
     note = fields.Text(string='Note')
     stock_move_line_ids = fields.Many2many('stock.move.line')
 
+<<<<<<< HEAD
     @api.depends('move_ids')
     def _compute_company_id(self):
         for record in self:
@@ -145,6 +154,8 @@ class KeimedStockMove(models.Model):
         for move in self:
             move.product_uom = move.product_id.uom_id.id
 
+=======
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
     @api.depends('stock_move_line_ids.quantity')
     def _compute_quantity(self):
         for move in self:

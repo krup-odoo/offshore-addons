@@ -64,14 +64,19 @@ class StockMove(models.Model):
 
         move_lines = self.keimed_wave_id.stock_move_line_ids.filtered(
 <<<<<<< HEAD
+<<<<<<< HEAD
             lambda x: x.move_id == self and not x.picked)
 =======
             lambda x: x.move_ids == self and not x.picked)
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+            lambda x: x.move_id == self and not x.picked)
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
         if move_lines:
             move_lines.write({
                 'picked': True
             })
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 
@@ -93,3 +98,5 @@ class StockMove(models.Model):
             }) for line in move_lines]
         })
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)

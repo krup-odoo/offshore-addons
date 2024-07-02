@@ -38,8 +38,12 @@ class StockMoveLine(models.Model):
     user_id = fields.Many2one(
         'res.users', compute='_compute_picker', store=True)
     note = fields.Text(string='Note')
+<<<<<<< HEAD
     is_stock_move_line_created = fields.Boolean(string='Is Stock Move Line Created')
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+    is_used_in_wave = fields.Boolean(string='Is Used In Wave')
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
 
     @api.depends('location_id', 'company_id')
     def _compute_picker(self):
@@ -57,6 +61,7 @@ class StockMoveLine(models.Model):
                     user = picker_attendance.user_id
             rec.picker_id = user
 
+<<<<<<< HEAD
     @api.onchange('to_do')
     def on_change_to_do(self):
         if self.to_do < 0.0 or self.to_do > self.quantity:
@@ -73,6 +78,19 @@ class StockMoveLine(models.Model):
         if self.move_ids and all(line.picked for line in self.keimed_wave_id.stock_move_line_ids.filtered(lambda x: x.move_ids == self.move_ids)):
             self.move_ids.picked = True
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+    # def picked_button_action(self):
+    #     if self.keimed_wave_id.is_snake_picking_wave and self.user_id != self.env.user:
+    #         raise ValidationError(
+    #             _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
+    #     self.picked = True
+    #     self.move_ids.write({
+    #         'to_do': 0,
+    #         'to_do_check': True
+    #     })
+    #     if self.move_ids and all(line.picked for line in self.keimed_wave_id.stock_move_line_ids.filtered(lambda x: x.move_ids == self.move_ids)):
+    #         self.move_ids.picked = True
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
 
     def change_basket_button_action(self):
         if self.result_package_id:
@@ -106,6 +124,7 @@ class StockMoveLine(models.Model):
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     def create_keimed_stock_move(self, move):
         return self.env['keimed.stock.move'].create({
@@ -118,6 +137,8 @@ class StockMoveLine(models.Model):
         })
 
 >>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
+=======
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
     def _add_to_keimed_wave(self):
         wave = self.env['keimed.wave'].create({
             'picker_id': self._context.get('active_owner_id'),
@@ -193,7 +214,14 @@ class StockMoveLine(models.Model):
 =======
         wave.write(wave_vals)
         self.write({'is_stock_move_line_created': True})
+<<<<<<< HEAD
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+        # if self._context.get('is_snake_picking'):
+        #     wave.move_ids._compute_picker()
+        # wave.action_confirm()
+
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
 
     def generate_pickings(self):
         move_lines = self.browse(self._context.get('active_ids'))

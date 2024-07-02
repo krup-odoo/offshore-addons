@@ -23,12 +23,16 @@
                 <field name="batch_id" optional="hide" />
                 <field name='origin' string="Source Document" />
 <<<<<<< HEAD
+<<<<<<< HEAD
                 <field name='is_used_in_wave' column_invisible="True" />
             </tree>
         </field>
     </record>
 =======
                 <field name='is_stock_move_line_created' column_invisible="True"/>
+=======
+                <field name='is_used_in_wave' column_invisible="True"/>
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
             </tree>
         </field>
     </record>

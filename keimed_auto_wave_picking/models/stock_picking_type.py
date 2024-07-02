@@ -20,10 +20,14 @@ class StockPickingType(models.Model):
                 ('product_id.detailed_type', '=', 'product'),
                 ('keimed_wave_id', '=', False),
 <<<<<<< HEAD
+<<<<<<< HEAD
                 ('is_used_in_wave', '=', False)
 =======
                 ('is_stock_move_line_created', '=', False)
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+                ('is_used_in_wave', '=', False)
+>>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
             ],
             'context': {'create': False},
         }
