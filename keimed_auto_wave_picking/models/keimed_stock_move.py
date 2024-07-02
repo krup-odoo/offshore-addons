@@ -159,8 +159,7 @@ class KeimedStockMove(models.Model):
     @api.depends('stock_move_line_ids.quantity')
     def _compute_quantity(self):
         for move in self:
-            total_quantity = sum(move.stock_move_line_ids.mapped('quantity'))
-            move.quantity = total_quantity
+            move.quantity = sum(move.stock_move_line_ids.mapped('quantity'))
 
 <<<<<<< HEAD
     @api.depends('move_line_ids.lot_id', 'move_line_ids.quantity')
@@ -169,6 +168,7 @@ class KeimedStockMove(models.Model):
 =======
     @api.depends('stock_move_line_ids.lot_id', 'stock_move_line_ids.quantity')
     def _compute_lot_ids(self):
+<<<<<<< HEAD
         domain = [
             ('id', 'in', self.stock_move_line_ids.ids),
             ('lot_id', '!=', False),
@@ -180,6 +180,8 @@ class KeimedStockMove(models.Model):
         )
         lots_by_move_id = {group['move_id'][0]: group['lot_id'] for group in lots_by_move}
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+>>>>>>> 2d455fe ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
         for move in self:
             move.lot_ids = move.stock_move_line_ids.mapped('lot_id')
 
