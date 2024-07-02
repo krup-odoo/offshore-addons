@@ -62,8 +62,8 @@ class StockMove(models.Model):
         })
         self.to_do = 0.0
 
-        move_lines = self.keimed_wave_id.move_line_ids.filtered(
-            lambda x: x.move_id == self and not x.picked)
+        move_lines = self.keimed_wave_id.stock_move_line_ids.filtered(
+            lambda x: x.move_ids == self and not x.picked)
         if move_lines:
             move_lines.write({
                 'picked': True
@@ -71,10 +71,10 @@ class StockMove(models.Model):
 
     def create_keimed_stock_move(self, move_lines):
         return self.env['keimed.stock.move'].create({
-            'move_id': self.id,
+            'move_ids': self.id,
             'location_id': self.location_id.id,
             'location_dest_id': self.location_dest_id.id,
-            'move_line_ids': [Command.create({
+            'stock_move_line_ids': [Command.create({
                 'move_line_id': line.id,
                 'company_id': line.company_id.id,
                 'product_id': line.product_id.id,

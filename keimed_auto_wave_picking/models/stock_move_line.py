@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import Command
+from odoo.tools import groupby
+from collections import defaultdict
 from odoo import fields, models, api, _
 from odoo.exceptions import UserError, ValidationError
-from collections import defaultdict
-from odoo import Command
 
 
 class StockMoveLine(models.Model):
@@ -26,10 +27,11 @@ class StockMoveLine(models.Model):
     priority = fields.Selection(
         related='picking_id.priority', string='Priority', store=True)
     to_do = fields.Float(
-        related='move_id.to_do', string='To-Do', copy=False)
+        string='To-Do', copy=False)
     user_id = fields.Many2one(
         'res.users', compute='_compute_picker', store=True)
     note = fields.Text(string='Note')
+    is_stock_move_line_created = fields.Boolean(string='Is Stock Move Line Created')
 
     @api.depends('location_id', 'company_id')
     def _compute_picker(self):
@@ -51,16 +53,16 @@ class StockMoveLine(models.Model):
             raise ValidationError(
                 _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
         self.picked = True
-        self.move_id.write({
+        self.move_ids.write({
             'to_do': 0,
             'to_do_check': True
         })
-        if self.move_id and all(line.picked for line in self.keimed_wave_id.move_line_ids.filtered(lambda x: x.move_id == self.move_id)):
-            self.move_id.picked = True
+        if self.move_ids and all(line.picked for line in self.keimed_wave_id.stock_move_line_ids.filtered(lambda x: x.move_ids == self.move_ids)):
+            self.move_ids.picked = True
 
     def change_basket_button_action(self):
         if self.result_package_id:
-            other_lines = self.keimed_wave_id.move_line_ids.filtered(
+            other_lines = self.keimed_wave_id.stock_move_line_ids.filtered(
                 lambda m: not m.picked and not m.to_do)
             other_lines.write({
                 'result_package_id': self.result_package_id
@@ -91,21 +93,12 @@ class StockMoveLine(models.Model):
 
     def create_keimed_stock_move(self, move):
         return self.env['keimed.stock.move'].create({
-            'move_id': move.id,
+            'move_ids': move.ids.id,
             'location_id': move.location_id.id,
             'location_dest_id': move.location_dest_id.id,
+            'product_uom_qty': move.product_uom_qty.id,
+            'product_uom': move.product_uom.id,
             'stock_move_line_ids': [Command.link(id) for id in self.ids],
-            'move_line_ids': [Command.create({
-                'move_line_id': line.id,
-                'company_id': line.company_id.id,
-                'product_id': line.product_id.id,
-                'quantity': line.quantity,
-                'lot_id': line.lot_id.id,
-                'package_id': line.package_id.id,
-                'result_package_id': line.result_package_id.id,
-                'location_id': line.location_id.id,
-                'location_dest_id': line.location_dest_id.id,
-            }) for line in self]
         })
 
     def _add_to_keimed_wave(self):
@@ -113,21 +106,35 @@ class StockMoveLine(models.Model):
             'picker_id': self._context.get('active_owner_id'),
             'is_snake_picking_wave': self._context.get('is_snake_picking'),
         })
-
-        line_by_move = defaultdict(lambda: self.env['stock.move.line'])
-        for line in self:
-            line_by_move[line.move_id] |= line
-
         wave_vals = {
             'move_ids': [],
         }
+        grouped_stock_move_lines = groupby(self, lambda ml: (ml.product_id, ml.location_id, ml.lot_id))
 
-        for move, move_lines in line_by_move.items():
-            wave_vals['move_ids'] += [Command.link(move_lines.create_keimed_stock_move(move).id)]
+        grouped_move_lines = {}
+        for key, move_lines in grouped_stock_move_lines:
+            grouped_move_lines[key] = self.env['stock.move.line'].concat(*list(move_lines))
+        for key, lines in grouped_move_lines.items():
+                product_id, location_id, lot_ids = key
+                quantity = sum(line.quantity for line in lines if line.quantity)
+                move_ids = [line.move_id.id for line in lines if line.move_id]
+                location_dest_id = lines[0].location_dest_id.id if lines and lines[0].location_dest_id else None
+
+                new_move_data = {
+                    'product_id': product_id.id,
+                    'location_id': location_id.id,
+                    'lot_ids': lot_ids.id if lot_ids else False, 
+                    'quantity': quantity,
+                    'location_dest_id': location_dest_id,
+                    'stock_move_line_ids': [Command.link(id) for id in lines.ids],
+                    'move_ids': [Command.link(id) for id in move_ids],
+                }
+
+                new_move = self.env['keimed.stock.move'].create(new_move_data)
+                wave_vals['move_ids'].append(new_move.id)
+
         wave.write(wave_vals)
-        if self._context.get('is_snake_picking'):
-            wave.move_ids._compute_picker()
-        wave.action_confirm()
+        self.write({'is_stock_move_line_created': True})
 
     def generate_pickings(self):
         move_lines = self.browse(self._context.get('active_ids'))

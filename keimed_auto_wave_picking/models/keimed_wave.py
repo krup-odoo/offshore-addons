@@ -19,8 +19,6 @@ class KeimedWave(models.Model):
         default=lambda self: self.env.company)
     checker_id = fields.Many2one('res.users', tracking=True, copy=False)
     scheduled_date = fields.Datetime(tracking=True, copy=False)
-    move_line_ids = fields.One2many(
-        'keimed.stock.move.line', 'keimed_wave_id', string='Detailed Operations')
     move_ids = fields.One2many(
         'keimed.stock.move', 'keimed_wave_id', string='Operations')
     state = fields.Selection([
