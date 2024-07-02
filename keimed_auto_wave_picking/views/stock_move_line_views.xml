@@ -21,7 +21,7 @@
                 <field name="quantity" readonly="1" />
                 <field name="to_do" />
                 <field name="company_id" groups="base.group_multi_company" />
-                <button name="picked_button_action" title="Picked" type="object" icon="fa-check" column_invisible="context.get('keimed_wave_state') in ['done', 'cancel']" invisible="picked" />
+                <!-- <button name="picked_button_action" title="Picked" type="object" icon="fa-check" column_invisible="context.get('keimed_wave_state') in ['done', 'cancel']" invisible="picked" /> -->
                 <field name="note" readonly="keimed_wave_id.state != 'done'" />
                 <button name="change_basket_button_action" title="Change Basket" type="object" icon="fa-shopping-basket" column_invisible="context.get('keimed_wave_state') in ['done', 'cancel']" invisible="picked or not result_package_id" groups="stock.group_tracking_lot" />
             </tree>

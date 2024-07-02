@@ -22,7 +22,7 @@
                 <field name='movement_type_id' />
                 <field name="batch_id" optional="hide" />
                 <field name='origin' string="Source Document" />
-                <field name='is_stock_move_line_created' column_invisible="True"/>
+                <field name='is_used_in_wave' column_invisible="True"/>
             </tree>
         </field>
     </record>

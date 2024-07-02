@@ -108,17 +108,17 @@ class KeimedStockMoveLine(models.Model):
                 rec.to_do_change_count += 1
                 rec.to_do_check = False
 
-    def picked_button_action(self):
-        if self.keimed_wave_id.is_snake_picking_wave and self.picker_id != self.env.user:
-            raise ValidationError(
-                _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
-        self.picked = True
-        self.move_id.write({
-            'to_do': 0,
-            'to_do_check': True
-        })
-        if self.move_id and all(line.picked for line in self.keimed_wave_id.move_line_ids.filtered(lambda x: x.move_id == self.move_id)):
-            self.move_id.picked = True
+    # def picked_button_action(self):
+    #     if self.keimed_wave_id.is_snake_picking_wave and self.picker_id != self.env.user:
+    #         raise ValidationError(
+    #             _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
+    #     self.picked = True
+    #     self.move_id.write({
+    #         'to_do': 0,
+    #         'to_do_check': True
+    #     })
+    #     if self.move_id and all(line.picked for line in self.keimed_wave_id.move_line_ids.filtered(lambda x: x.move_id == self.move_id)):
+    #         self.move_id.picked = True
 
     def change_basket_button_action(self):
         if self.result_package_id:

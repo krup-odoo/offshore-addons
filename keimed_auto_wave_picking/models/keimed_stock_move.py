@@ -16,9 +16,9 @@ class KeimedStockMove(models.Model):
         'keimed.wave', string='Keimed Wave')
     keimed_wave_state = fields.Selection(related='keimed_wave_id.state')
     company_id = fields.Many2one(
-        'res.company', string='Company', compute='_compute_company_id', store=True)
+        'res.company', string='Company', store=True)
     product_id = fields.Many2one(
-        'product.product', string='Product', compute='_compute_product_id', store=True)
+        'product.product', string='Product', store=True)
     product_uom_qty = fields.Float(
         string='Demand',
         digits='Product Unit of Measure', default=0, required=True,
@@ -77,7 +77,7 @@ class KeimedStockMove(models.Model):
     basket_number_id = fields.Many2one(
         "stock.quant.package", string='Basket No.',
         compute='_compute_basket_number', inverse='_inverse_basket_number',
-        store=True, coS00044py=False, readonly=False)
+        store=True, copy=False, readonly=False)
     to_do = fields.Float(
         string='To-Do', compute='_compute_to_do', store=True, copy=False,
         readonly=False)
@@ -89,23 +89,6 @@ class KeimedStockMove(models.Model):
         'res.users', compute='_compute_picker', store=True, copy=False)
     note = fields.Text(string='Note')
     stock_move_line_ids = fields.Many2many('stock.move.line')
-
-    @api.depends('move_ids')
-    def _compute_company_id(self):
-        for record in self:
-            if record.move_ids:
-                record.company_id = record.move_ids.company_id
-
-    @api.depends('move_ids')
-    def _compute_product_id(self):
-        for record in self:
-            if record.move_ids:
-                record.product_id = record.move_ids.product_id
-
-    @api.depends('product_id')
-    def _compute_product_uom(self):
-        for move in self:
-            move.product_uom = move.product_id.uom_id.id
 
     @api.depends('stock_move_line_ids.quantity')
     def _compute_quantity(self):

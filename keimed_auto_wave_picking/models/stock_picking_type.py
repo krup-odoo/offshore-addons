@@ -19,7 +19,7 @@ class StockPickingType(models.Model):
                 ('picking_id.state', '=', 'assigned'),
                 ('product_id.detailed_type', '=', 'product'),
                 ('keimed_wave_id', '=', False),
-                ('is_stock_move_line_created', '=', False)
+                ('is_used_in_wave', '=', False)
             ],
             'context': {'create': False},
         }

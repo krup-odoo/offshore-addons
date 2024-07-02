@@ -31,7 +31,7 @@ class StockMoveLine(models.Model):
     user_id = fields.Many2one(
         'res.users', compute='_compute_picker', store=True)
     note = fields.Text(string='Note')
-    is_stock_move_line_created = fields.Boolean(string='Is Stock Move Line Created')
+    is_used_in_wave = fields.Boolean(string='Is Used In Wave')
 
     @api.depends('location_id', 'company_id')
     def _compute_picker(self):
@@ -48,17 +48,17 @@ class StockMoveLine(models.Model):
                     user = picker_attendance.user_id
             rec.user_id = user
 
-    def picked_button_action(self):
-        if self.keimed_wave_id.is_snake_picking_wave and self.user_id != self.env.user:
-            raise ValidationError(
-                _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
-        self.picked = True
-        self.move_ids.write({
-            'to_do': 0,
-            'to_do_check': True
-        })
-        if self.move_ids and all(line.picked for line in self.keimed_wave_id.stock_move_line_ids.filtered(lambda x: x.move_ids == self.move_ids)):
-            self.move_ids.picked = True
+    # def picked_button_action(self):
+    #     if self.keimed_wave_id.is_snake_picking_wave and self.user_id != self.env.user:
+    #         raise ValidationError(
+    #             _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
+    #     self.picked = True
+    #     self.move_ids.write({
+    #         'to_do': 0,
+    #         'to_do_check': True
+    #     })
+    #     if self.move_ids and all(line.picked for line in self.keimed_wave_id.stock_move_line_ids.filtered(lambda x: x.move_ids == self.move_ids)):
+    #         self.move_ids.picked = True
 
     def change_basket_button_action(self):
         if self.result_package_id:
@@ -90,16 +90,6 @@ class StockMoveLine(models.Model):
             'target': 'new',
             'context': {'default_no_of_lines_to_be_picked': len(self)},
         }
-
-    def create_keimed_stock_move(self, move):
-        return self.env['keimed.stock.move'].create({
-            'move_ids': move.ids.id,
-            'location_id': move.location_id.id,
-            'location_dest_id': move.location_dest_id.id,
-            'product_uom_qty': move.product_uom_qty.id,
-            'product_uom': move.product_uom.id,
-            'stock_move_line_ids': [Command.link(id) for id in self.ids],
-        })
 
     def _add_to_keimed_wave(self):
         wave = self.env['keimed.wave'].create({
@@ -135,6 +125,10 @@ class StockMoveLine(models.Model):
 
         wave.write(wave_vals)
         self.write({'is_stock_move_line_created': True})
+        # if self._context.get('is_snake_picking'):
+        #     wave.move_ids._compute_picker()
+        # wave.action_confirm()
+
 
     def generate_pickings(self):
         move_lines = self.browse(self._context.get('active_ids'))
