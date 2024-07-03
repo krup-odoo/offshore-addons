@@ -20,7 +20,7 @@ class SplitWaveWizard(models.TransientModel):
         string='No. of Waves to be Created')
     max_lines_per_wave = fields.Integer(string='No. of Lines')
     scheduled_date = fields.Date()
-    user_id = fields.Many2one('res.users', string='Picker')
+    picker_id = fields.Many2one('res.users', string='Picker')
     picking_ids = fields.Many2many('stock.picking')
     line_ids = fields.Many2many('stock.move.line')
     wave_id = fields.Many2one(
@@ -41,8 +41,8 @@ class SplitWaveWizard(models.TransientModel):
 
     def attach_pickings(self):
         self.ensure_one()
-        if self.user_id:
-            self = self.with_context(active_owner_id=self.user_id.id)
+        if self.picker_id:
+            self = self.with_context(active_owner_id=self.picker_id.id)
         if self.line_ids:
             company = self.line_ids.company_id
             if len(company) > 1:

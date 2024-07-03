@@ -11,18 +11,19 @@ class KeimedStockMove(models.Model):
     _inherit = ['mail.thread']
     _description = 'Keimed Stock Move'
 
-    move_id = fields.Many2one('stock.move', required=True)
+    move_ids = fields.Many2many('stock.move', required=True)
+    stock_move_line_ids = fields.Many2many('stock.move.line')
     keimed_wave_id = fields.Many2one(
         'keimed.wave', string='Keimed Wave')
     keimed_wave_state = fields.Selection(related='keimed_wave_id.state')
-    company_id = fields.Many2one(related='move_id.company_id')
-    product_id = fields.Many2one(related='move_id.product_id')
-    product_uom_qty = fields.Float(
-        related='move_id.product_uom_qty', string='Demand',
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True)
+    product_id = fields.Many2one(
+        'product.product', string='Product', required=True)
+    product_uom_qty = fields.Float(string='Demand',
         digits='Product Unit of Measure', default=0, required=True,
         help="This is the quantity of product that is planned to be moved.")
-    product_uom = fields.Many2one(
-        related='move_id.product_uom', string='UoM', required=True)
+    product_uom = fields.Many2one('uom.uom', string='UoM', required=True)
     product_uom_category_id = fields.Many2one(
         related='product_id.uom_id.category_id')
 
@@ -53,15 +54,12 @@ class KeimedStockMove(models.Model):
         'Picked', copy=False,
         help="This checkbox is just indicative, it doesn't validate or generate any product moves.")
 
-    price_unit = fields.Float(
-        related='move_id.price_unit', string='Unit Price', copy=False)
-    origin = fields.Char(related='move_id.origin', string='Source Document')
-    move_line_ids = fields.One2many('keimed.stock.move.line', 'keimed_move_id')
+    price_unit = fields.Float(string='Unit Price', copy=False)
     has_tracking = fields.Selection(
         related='product_id.tracking', string='Product with Tracking')
     quantity = fields.Float(
         'Quantity', compute='_compute_quantity',
-        digits='Product Unit of Measure', inverse='_set_quantity', store=True)
+        digits='Product Unit of Measure', store=True)
 
     product_type = fields.Selection(
         related='product_id.detailed_type', readonly=True)
@@ -89,56 +87,15 @@ class KeimedStockMove(models.Model):
         'res.users', compute='_compute_picker', store=True, copy=False)
     note = fields.Text(string='Note')
 
-    @api.depends('product_id')
-    def _compute_product_uom(self):
-        for move in self:
-            move.product_uom = move.product_id.uom_id.id
-
-    def _quantity_sml(self):
-        self.ensure_one()
-        quantity = 0
-        for move_line in self.move_line_ids:
-            quantity += move_line.product_uom_id._compute_quantity(
-                move_line.quantity, self.product_uom, round=False)
-        return quantity
-
-    @api.depends('move_line_ids.quantity', 'move_line_ids.product_uom_id')
+    @api.depends('stock_move_line_ids.quantity')
     def _compute_quantity(self):
-        """ This field represents the sum of the move lines `quantity`. It allows the user to know
-        if there is still work to do.
-
-        We take care of rounding this value at the general decimal precision and not the rounding
-        of the move's UOM to make sure this value is really close to the real sum.
-        """
-        move_lines_ids = set()
         for move in self:
-            move_lines_ids |= set(move.move_line_ids.ids)
+            move.quantity = sum(move.stock_move_line_ids.mapped('quantity'))
 
-        data = self.env['keimed.stock.move.line']._read_group(
-            [('id', 'in', list(move_lines_ids))],
-            ['keimed_move_id', 'product_uom_id'], ['quantity:sum']
-        )
-        sum_qty = defaultdict(float)
-        for move, product_uom, qty_sum in data:
-            uom = move.product_uom
-            sum_qty[move.id] += product_uom._compute_quantity(
-                qty_sum, uom, round=False)
-
-        for move in self:
-            move.quantity = sum_qty[move.id]
-
-    @api.depends('move_line_ids.lot_id', 'move_line_ids.quantity')
+    @api.depends('stock_move_line_ids.lot_id', 'stock_move_line_ids.quantity')
     def _compute_lot_ids(self):
-        domain = [('keimed_move_id', 'in', self.ids), ('lot_id',
-                                                       '!=', False), ('quantity', '!=', 0.0)]
-        lots_by_move_id = self.env['keimed.stock.move.line']._read_group(
-            domain,
-            ['keimed_move_id'], ['lot_id:array_agg'],
-        )
-        lots_by_move_id = {move.id: lot_ids for move,
-                           lot_ids in lots_by_move_id}
         for move in self:
-            move.lot_ids = lots_by_move_id.get(move._origin.id, [])
+            move.lot_ids = move.stock_move_line_ids.mapped('lot_id')
 
     @api.depends('has_tracking', 'state', 'product_id.detailed_type')
     def _compute_show_info(self):
@@ -160,27 +117,28 @@ class KeimedStockMove(models.Model):
                 rec.to_do_change_count += 1
                 rec.to_do_check = False
 
-    @api.depends('move_line_ids', 'move_line_ids.result_package_id')
+    @api.depends('stock_move_line_ids', 'stock_move_line_ids.result_package_id')
     def _compute_basket_number(self):
         for rec in self:
-            if rec.move_line_ids:
-                rec.basket_number_id = rec.move_line_ids[0].result_package_id if len(
-                    rec.move_line_ids) > 1 else rec.move_line_ids.result_package_id
+            if rec.stock_move_line_ids:
+                rec.basket_number_id = rec.stock_move_line_ids[0].result_package_id if len(
+                    rec.stock_move_line_ids) > 1 else rec.stock_move_line_ids.result_package_id
             else:
                 rec.basket_number_id = False
 
     def _inverse_basket_number(self):
         for move in self.filtered(lambda m: m.keimed_wave_id):
-            move_line = move.move_line_ids[0] if len(
-                move.move_line_ids) > 1 else move.move_line_ids
+            move_line = move.stock_move_line_ids[0] if len(
+                move.stock_move_line_ids) > 1 else move.stock_move_line_ids
             move_line.result_package_id = move.basket_number_id
 
     @api.depends('location_id', 'company_id')
     def _compute_picker(self):
+        PickerAttendance = self.env['picker.attendance']
         for rec in self:
             picker = False
             if rec.keimed_wave_id and rec.keimed_wave_id.is_snake_picking_wave:
-                picker_attendance = self.env['picker.attendance'].search([
+                picker_attendance = PickerAttendance.search([
                     ('location_id', '=', rec.location_id.id),
                     ('company_id', '=', rec.company_id.id),
                     ('checkin_date', '!=', False),
@@ -188,7 +146,10 @@ class KeimedStockMove(models.Model):
                 ], order='id desc', limit=1)
                 if picker_attendance:
                     picker = picker_attendance.user_id
-            rec.picker_id = picker
+            if rec.company_id.picking_type != 'snake_picking' or rec.company_id.snake_picking_type != 'zone':
+                rec.picker_id = picker
+            else:
+                rec.picker_id = False
 
     @api.onchange('to_do')
     def on_change_to_do(self):
@@ -199,20 +160,32 @@ class KeimedStockMove(models.Model):
             self.picked = False
 
     def picked_button_action(self):
-        if self.keimed_wave_id.is_snake_picking_wave and self.picker_id != self.env.user:
+        picker_attendances = self.env['picker.attendance'].search([
+            ('location_id', '=', self.location_id.id),
+            ('company_id', '=', self.company_id.id),
+            ('checkin_date', '!=', False),
+            ('checkout_date', '=', False),
+        ])
+        user_ids = picker_attendances.mapped('user_id').ids
+        if self.keimed_wave_id.is_snake_picking_wave and self.picker_id and self.picker_id.id != self.env.user.id:
+            raise ValidationError(
+                _('You can not pick this product. %s is picking this product.', self.picker_id.name))
+        elif self.keimed_wave_id.is_snake_picking_wave and self.env.user.id not in user_ids:
             raise ValidationError(
                 _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
+        if self.keimed_wave_id.is_snake_picking_wave:
+            move_ids = self.keimed_wave_id.move_ids.filtered(lambda move: move.location_id.id == self.location_id.id)
+            for move in move_ids:
+                move.picker_id = self.env.user
         self.write({
             'picked': True,
             'to_do': 0,
             'to_do_check': True
         })
-        # if self.move_id and all(line.picked for line in self.keimed_wave_id.move_line_ids.filtered(lambda x: x.move_id == self.move_id)):
-        #     self.move_id.picked = True
 
     def change_basket_button_action(self):
         if self.result_package_id:
-            other_lines = self.keimed_wave_id.move_line_ids.filtered(
+            other_lines = self.keimed_wave_id.stock_move_line_ids.filtered(
                 lambda m: not m.picked and not m.to_do)
             other_lines.write({
                 'result_package_id': self.result_package_id
@@ -226,9 +199,20 @@ class KeimedStockMove(models.Model):
             'to_do': 0.0
         })
 
-        # move_lines = self.keimed_wave_id.move_line_ids.filtered(
-        #     lambda x: x.move_id == self and not x.picked)
-        # if move_lines:
-        #     move_lines.write({
-        #         'picked': True
-        #     })
+    def show_stock_move_lines(self):
+        operation_type = 'detailed_operation' if self.env.context.get(
+            'detailed_operation') else 'operation'
+
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Stock Move Lines",
+            "res_model": "stock.move.line",
+            "views": [[self.env.ref(
+                'keimed_auto_wave_picking.stock_move_line_tree_view_as_wizard_keimed_auto_wave_picking').id, "tree"]],
+            "target": "new",
+            "domain": [("id", "in", self.stock_move_line_ids.ids)],
+            "context": {
+                'default_stock_move_line_ids': self.stock_move_line_ids.ids,
+                'operation_type': operation_type
+            }
+        }

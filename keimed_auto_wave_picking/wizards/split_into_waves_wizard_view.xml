@@ -15,7 +15,7 @@
                     <group>
                         <field name="wave_based_on" widget="radio" options="{'horizontal': true}" required="1" />
                         <field name="scheduled_date" />
-                        <field name="user_id" options="{'no_create': True}" />
+                        <field name="picker_id" options="{'no_create': True}" />
                     </group>
                 </group>
                 <footer>

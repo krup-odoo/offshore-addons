@@ -19,8 +19,6 @@ class KeimedWave(models.Model):
         default=lambda self: self.env.company)
     checker_id = fields.Many2one('res.users', tracking=True, copy=False)
     scheduled_date = fields.Datetime(tracking=True, copy=False)
-    move_line_ids = fields.One2many(
-        'keimed.stock.move.line', 'keimed_wave_id', string='Detailed Operations')
     move_ids = fields.One2many(
         'keimed.stock.move', 'keimed_wave_id', string='Operations')
     state = fields.Selection([
@@ -92,13 +90,14 @@ class KeimedWave(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        IrSequence = self.env['ir.sequence']
         for vals in vals_list:
             if vals.get('name', 'New') == 'New':
                 if vals.get('is_snake_picking_wave'):
-                    vals['name'] = self.env['ir.sequence'].next_by_code(
+                    vals['name'] = IrSequence.next_by_code(
                         'snake.picking') or '/'
                 else:
-                    vals['name'] = self.env['ir.sequence'].next_by_code(
+                    vals['name'] = IrSequence.next_by_code(
                         'keimed.wave') or '/'
         return super(KeimedWave, self).create(vals_list)
 

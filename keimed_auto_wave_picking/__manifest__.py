@@ -3,7 +3,7 @@
 
 {
     'name': 'Wave Picking',
-    'version': '17.0.2.1.0',
+    'version': '17.0.2.2.0',
     'description': """
         Auto Wave Picking
         -----------------

@@ -78,8 +78,9 @@ class GroupByFilterWizard(models.TransientModel):
 
     @api.depends('group_by_contact')
     def _compute_display_sale_order(self):
+        StockPicking = self.env['stock.picking']
         for record in self:
-            record.filter_by_stock_picking = self.env['stock.picking'].search([
+            record.filter_by_stock_picking = StockPicking.search([
                 ('state', '=', "assigned"),
                 ('picking_type_id.name', '=', 'Pick')
             ]).mapped('sale_id.order_line').filtered_domain([
