@@ -13,13 +13,18 @@ class KeimedStockMove(models.Model):
 
     move_ids = fields.Many2many('stock.move', required=True)
 <<<<<<< HEAD
+<<<<<<< HEAD
     stock_move_line_ids = fields.Many2many('stock.move.line')
 =======
 >>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
+=======
+    stock_move_line_ids = fields.Many2many('stock.move.line')
+>>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
     keimed_wave_id = fields.Many2one(
         'keimed.wave', string='Keimed Wave')
     keimed_wave_state = fields.Selection(related='keimed_wave_id.state')
     company_id = fields.Many2one(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -39,15 +44,21 @@ class KeimedStockMove(models.Model):
 =======
         'res.company', string='Company', store=True)
 >>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+        'res.company', string='Company', required=True)
+>>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
     product_id = fields.Many2one(
-        'product.product', string='Product', store=True)
-    product_uom_qty = fields.Float(
-        string='Demand',
+        'product.product', string='Product', required=True)
+    product_uom_qty = fields.Float(string='Demand',
         digits='Product Unit of Measure', default=0, required=True,
         help="This is the quantity of product that is planned to be moved.")
+<<<<<<< HEAD
     product_uom = fields.Many2one(
         string='UoM', required=True)
 >>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
+=======
+    product_uom = fields.Many2one('uom.uom', string='UoM', required=True)
+>>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
     product_uom_category_id = fields.Many2one(
         related='product_id.uom_id.category_id')
 
@@ -79,6 +90,7 @@ class KeimedStockMove(models.Model):
         help="This checkbox is just indicative, it doesn't validate or generate any product moves.")
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     price_unit = fields.Float(string='Unit Price', copy=False)
 =======
     price_unit = fields.Float(
@@ -89,6 +101,9 @@ class KeimedStockMove(models.Model):
 >>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
 =======
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+    price_unit = fields.Float(string='Unit Price', copy=False)
+>>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
     has_tracking = fields.Selection(
         related='product_id.tracking', string='Product with Tracking')
     quantity = fields.Float(
@@ -126,7 +141,6 @@ class KeimedStockMove(models.Model):
         'res.users', compute='_compute_picker', store=True, copy=False,
         index=True)
     note = fields.Text(string='Note')
-    stock_move_line_ids = fields.Many2many('stock.move.line')
 
 <<<<<<< HEAD
     @api.depends('move_ids')
@@ -241,6 +255,7 @@ class KeimedStockMove(models.Model):
                 rec.picker_id = picker
             else:
                 rec.picker_id = False
+<<<<<<< HEAD
 
     def picked_button_action(self):
         self.ensure_one()
@@ -268,6 +283,35 @@ class KeimedStockMove(models.Model):
         for line in self.stock_move_line_ids:
             line.to_do = 0
 
+=======
+
+    @api.onchange('to_do')
+    def on_change_to_do(self):
+        if self.to_do < 0.0 or self.to_do > self.product_uom_qty:
+            raise ValidationError(
+                _("The to do quantity must be greater than zero and less than demanded quantity"))
+        else:
+            self.picked = False
+
+    def picked_button_action(self):
+        picker_attendances = self.env['picker.attendance'].search([
+            ('location_id', '=', self.location_id.id),
+            ('company_id', '=', self.company_id.id),
+            ('checkin_date', '!=', False),
+            ('checkout_date', '=', False),
+        ])
+        user_ids = picker_attendances.mapped('user_id').ids
+        if self.keimed_wave_id.is_snake_picking_wave and self.picker_id and self.picker_id.id != self.env.user.id:
+            raise ValidationError(
+                _('You can not pick this product. %s is picking this product.', self.picker_id.name))
+        elif self.keimed_wave_id.is_snake_picking_wave and self.env.user.id not in user_ids:
+            raise ValidationError(
+                _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
+        if self.keimed_wave_id.is_snake_picking_wave:
+            move_ids = self.keimed_wave_id.move_ids.filtered(lambda move: move.location_id.id == self.location_id.id)
+            for move in move_ids:
+                move.picker_id = self.env.user
+>>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
         self.write({
             'picked': True,
             'to_do_check': True
@@ -289,6 +333,7 @@ class KeimedStockMove(models.Model):
             'to_do': 0.0
         })
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     def show_stock_move_lines(self):
@@ -330,15 +375,20 @@ class KeimedStockMove(models.Model):
 =======
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
 
+=======
+>>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
     def show_stock_move_lines(self):
         operation_type = 'detailed_operation' if self.env.context.get(
             'detailed_operation') else 'operation'
+
         return {
             "type": "ir.actions.act_window",
             "name": "Stock Move Lines",
-            "res_model": "stock.move.lines.wizard",
-            "view_mode": "form",
+            "res_model": "stock.move.line",
+            "views": [[self.env.ref(
+                'keimed_auto_wave_picking.stock_move_line_tree_view_as_wizard_keimed_auto_wave_picking').id, "tree"]],
             "target": "new",
+            "domain": [("id", "in", self.stock_move_line_ids.ids)],
             "context": {
                 'default_stock_move_line_ids': self.stock_move_line_ids.ids,
                 'operation_type': operation_type

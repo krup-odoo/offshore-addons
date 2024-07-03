@@ -24,6 +24,7 @@
                 <field name='origin' string="Source Document" />
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                 <field name='is_used_in_wave' column_invisible="True" />
             </tree>
         </field>
@@ -38,6 +39,12 @@
     </record>
 
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+                <field name='is_used_in_wave' column_invisible="True" />
+            </tree>
+        </field>
+    </record>
+>>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
     <record id="stock_move_line_search_view_inherited" model="ir.ui.view">
         <field name="name">stock.move.line.view.inherit.search</field>
         <field name="model">stock.move.line</field>
