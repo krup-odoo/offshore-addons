@@ -1,5 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <record id="stock_move_line_tree_view_as_wizard_keimed_auto_wave_picking" model="ir.ui.view">
+        <field name="name">stock.move.line.view.tree.as.wizard.keimed.auto.wave.picking</field>
+        <field name="model">stock.move.line</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" edit="1" create="0" delete="0" decoration-muted="state == 'cancel'" default_order="picked ASC, product_id ASC, location_id ASC" string="Move Lines">
+                <field name="tracking" column_invisible="True" />
+                <field name="picked" column_invisible="True" />
+                <field name="state" column_invisible="True" />
+                <field name="company_id" column_invisible="True" />
+                <field name="keimed_wave_id" column_invisible="True" />
+                <field name="product_id" context="{'default_detailed_type': 'product'}" required="1" readonly="context.get('operation_type') in ['detailed_operation', 'operation']" />
+                <field name="lot_id" groups="stock.group_production_lot" readonly="context.get('operation_type') == 'detailed_operation'" />
+                <field name="location_id" context="{'display_only_current_location_name': True}" readonly="context.get('operation_type') in ['detailed_operation', 'operation']"/>
+                <field name="location_dest_id" readonly="context.get('operation_type') in ['detailed_operation', 'operation']" />
+                <field name="picker_id" string="Picker" column_invisible="True" />
+                <field name="package_id" groups="stock.group_tracking_lot" column_invisible="1" />
+                <field name="result_package_id" string="Basket No." groups="stock.group_tracking_lot" readonly="picked" />
+                <field name="product_uom_category_id" column_invisible="True"/>
+                <field name="product_uom_id" options="{'no_create': True}" groups="uom.group_uom" readonly="context.get('operation_type') in ['detailed_operation', 'operation']" />
+                <field name="quantity" readonly="1" />
+                <field name="to_do" />
+                <field name="company_id" groups="base.group_multi_company" />
+                <!-- <button name="picked_button_action" title="Picked" type="object" icon="fa-check" column_invisible="context.get('keimed_wave_state') in ['done', 'cancel']" invisible="picked" /> -->
+                <field name="note" readonly="context.get('operation_type') in ['detailed_operation', 'operation']" />
+                <button name="change_basket_button_action" title="Change Basket" type="object" icon="fa-shopping-basket" column_invisible="context.get('keimed_wave_state') in ['done', 'cancel']" invisible="picked or not result_package_id" groups="stock.group_tracking_lot" />
+            </tree>
+        </field>
+    </record>
     <record id="stock_move_line_tree_view_keimed_auto_wave_picking" model="ir.ui.view">
         <field name="name">stock.move.line.view.tree.keimed.auto.wave.picking</field>
         <field name="model">stock.move.line</field>
@@ -14,7 +42,7 @@
                 <field name="lot_id" groups="stock.group_production_lot" readonly="tracking not in ['lot', 'serial'] or picked" />
                 <field name="location_id" readonly="picked" context="{'display_only_current_location_name': True}" />
                 <field name="location_dest_id" readonly="picked" />
-                <field name="user_id" string="Picker" column_invisible="True" />
+                <field name="picker_id" string="Picker" column_invisible="True" />
                 <field name="package_id" groups="stock.group_tracking_lot" column_invisible="1" />
                 <field name="result_package_id" string="Basket No." groups="stock.group_tracking_lot" readonly="picked" />
                 <field name="product_uom_id" options="{'no_create': True}" groups="uom.group_uom" readonly="1" />
