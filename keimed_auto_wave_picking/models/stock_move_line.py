@@ -48,6 +48,12 @@ class StockMoveLine(models.Model):
                     user = picker_attendance.user_id
             rec.picker_id = user
 
+    @api.onchange('to_do')
+    def on_change_to_do(self):
+        if self.to_do < 0.0 or self.to_do > self.quantity:
+            raise ValidationError(
+                _("The to do quantity must be greater than zero and less than demanded quantity"))
+
     def change_basket_button_action(self):
         if self.result_package_id:
             other_lines = self.keimed_wave_id.stock_move_line_ids.filtered(

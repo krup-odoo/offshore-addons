@@ -77,11 +77,8 @@ class KeimedStockMove(models.Model):
         compute='_compute_basket_number', inverse='_inverse_basket_number',
         store=True, copy=False, readonly=False)
     to_do = fields.Float(
-        string='To-Do', compute='_compute_to_do', store=True, copy=False,
-        readonly=False)
-    to_do_change_count = fields.Integer(
-        compute='_compute_to_do_count', string="To-do count",
-        store=True, default=-1)
+        string='To-Do', compute='_compute_to_do', store=True, copy=False)
+    to_do_change_count = fields.Integer(string='To-do count')
     to_do_check = fields.Boolean(default=True)
     picker_id = fields.Many2one(
         'res.users', compute='_compute_picker', store=True, copy=False)
@@ -105,17 +102,10 @@ class KeimedStockMove(models.Model):
                 and move.has_tracking != 'none' and move.state == 'done'
             move.show_lots_text = move.has_tracking != 'none' and move.state != 'done'
 
-    @api.depends('quantity', 'product_uom_qty')
+    @api.depends('stock_move_line_ids.to_do')
     def _compute_to_do(self):
-        for record in self:
-            record.to_do = record.product_uom_qty - record.quantity
-
-    @api.depends('to_do')
-    def _compute_to_do_count(self):
-        for rec in self:
-            if not rec.picked and rec.to_do_check:
-                rec.to_do_change_count += 1
-                rec.to_do_check = False
+        for move in self:
+            move.to_do = sum(move.stock_move_line_ids.mapped('to_do'))
 
     @api.depends('stock_move_line_ids', 'stock_move_line_ids.result_package_id')
     def _compute_basket_number(self):
@@ -151,35 +141,34 @@ class KeimedStockMove(models.Model):
             else:
                 rec.picker_id = False
 
-    @api.onchange('to_do')
-    def on_change_to_do(self):
-        if self.to_do < 0.0 or self.to_do > self.product_uom_qty:
-            raise ValidationError(
-                _("The to do quantity must be greater than zero and less than demanded quantity"))
-        else:
-            self.picked = False
-
     def picked_button_action(self):
-        picker_attendances = self.env['picker.attendance'].search([
-            ('location_id', '=', self.location_id.id),
-            ('company_id', '=', self.company_id.id),
-            ('checkin_date', '!=', False),
-            ('checkout_date', '=', False),
-        ])
-        user_ids = picker_attendances.mapped('user_id').ids
+        self.ensure_one()
         if self.keimed_wave_id.is_snake_picking_wave and self.picker_id and self.picker_id.id != self.env.user.id:
             raise ValidationError(
                 _('You can not pick this product. %s is picking this product.', self.picker_id.name))
-        elif self.keimed_wave_id.is_snake_picking_wave and self.env.user.id not in user_ids:
-            raise ValidationError(
-                _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
-        if self.keimed_wave_id.is_snake_picking_wave:
-            move_ids = self.keimed_wave_id.move_ids.filtered(lambda move: move.location_id.id == self.location_id.id)
+
+        elif self.keimed_wave_id.is_snake_picking_wave:
+            user_ids = self.env['picker.attendance'].search([
+                ('location_id', '=', self.location_id.id),
+                ('company_id', '=', self.company_id.id),
+                ('checkin_date', '!=', False),
+                ('checkout_date', '=', False),
+            ]).mapped('user_id').ids
+
+            if self.env.user.id not in user_ids:
+                raise ValidationError(
+                    _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
+
+            move_ids = self.keimed_wave_id.move_ids.filtered(
+                lambda move: move.location_id.id == self.location_id.id)
             for move in move_ids:
                 move.picker_id = self.env.user
+
+        for line in self.stock_move_line_ids:
+            line.to_do = 0
+
         self.write({
             'picked': True,
-            'to_do': 0,
             'to_do_check': True
         })
 
@@ -200,19 +189,19 @@ class KeimedStockMove(models.Model):
         })
 
     def show_stock_move_lines(self):
-        operation_type = 'detailed_operation' if self.env.context.get(
-            'detailed_operation') else 'operation'
-
         return {
             "type": "ir.actions.act_window",
-            "name": "Stock Move Lines",
+            "name": "Detailed Picklist",
             "res_model": "stock.move.line",
             "views": [[self.env.ref(
-                'keimed_auto_wave_picking.stock_move_line_tree_view_as_wizard_keimed_auto_wave_picking').id, "tree"]],
+                'keimed_auto_wave_picking.stock_move_line_tree_view_as_wizard_keimed_auto_wave_picking'
+            ).id, "tree"]],
             "target": "new",
             "domain": [("id", "in", self.stock_move_line_ids.ids)],
             "context": {
                 'default_stock_move_line_ids': self.stock_move_line_ids.ids,
-                'operation_type': operation_type
+                'operation_type': 'detailed_operation' if self.env.context.get(
+                    'detailed_operation') else 'operation',
+                'checked': self.checked,
             }
         }
