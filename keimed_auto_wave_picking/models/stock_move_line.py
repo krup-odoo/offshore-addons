@@ -26,11 +26,20 @@ class StockMoveLine(models.Model):
         related='picking_id.scheduled_date')
     priority = fields.Selection(
         related='picking_id.priority', string='Priority', store=True)
+<<<<<<< HEAD
     to_do = fields.Float(string='To-Do', copy=False)
     picker_id = fields.Many2one(
         'res.users', compute='_compute_picker', store=True)
     note = fields.Text(string='Note')
     is_used_in_wave = fields.Boolean(string='Is Used In Wave')
+=======
+    to_do = fields.Float(
+        string='To-Do', copy=False)
+    user_id = fields.Many2one(
+        'res.users', compute='_compute_picker', store=True)
+    note = fields.Text(string='Note')
+    is_stock_move_line_created = fields.Boolean(string='Is Stock Move Line Created')
+>>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
 
     @api.depends('location_id', 'company_id')
     def _compute_picker(self):
@@ -52,7 +61,18 @@ class StockMoveLine(models.Model):
     def on_change_to_do(self):
         if self.to_do < 0.0 or self.to_do > self.quantity:
             raise ValidationError(
+<<<<<<< HEAD
                 _("The to do quantity must be greater than zero and less than demanded quantity"))
+=======
+                _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
+        self.picked = True
+        self.move_ids.write({
+            'to_do': 0,
+            'to_do_check': True
+        })
+        if self.move_ids and all(line.picked for line in self.keimed_wave_id.stock_move_line_ids.filtered(lambda x: x.move_ids == self.move_ids)):
+            self.move_ids.picked = True
+>>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
 
     def change_basket_button_action(self):
         if self.result_package_id:
@@ -89,21 +109,12 @@ class StockMoveLine(models.Model):
 =======
     def create_keimed_stock_move(self, move):
         return self.env['keimed.stock.move'].create({
-            'move_id': move.id,
+            'move_ids': move.ids.id,
             'location_id': move.location_id.id,
             'location_dest_id': move.location_dest_id.id,
+            'product_uom_qty': move.product_uom_qty.id,
+            'product_uom': move.product_uom.id,
             'stock_move_line_ids': [Command.link(id) for id in self.ids],
-            'move_line_ids': [Command.create({
-                'move_line_id': line.id,
-                'company_id': line.company_id.id,
-                'product_id': line.product_id.id,
-                'quantity': line.quantity,
-                'lot_id': line.lot_id.id,
-                'package_id': line.package_id.id,
-                'result_package_id': line.result_package_id.id,
-                'location_id': line.location_id.id,
-                'location_dest_id': line.location_dest_id.id,
-            }) for line in self]
         })
 
 >>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
@@ -112,11 +123,38 @@ class StockMoveLine(models.Model):
             'picker_id': self._context.get('active_owner_id'),
             'is_snake_picking_wave': self._context.get('is_snake_picking'),
         })
+<<<<<<< HEAD
 
+=======
+>>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
         wave_vals = {
             'move_ids': [],
         }
+        grouped_stock_move_lines = groupby(self, lambda ml: (ml.product_id, ml.location_id, ml.lot_id))
 
+        grouped_move_lines = {}
+        for key, move_lines in grouped_stock_move_lines:
+            grouped_move_lines[key] = self.env['stock.move.line'].concat(*list(move_lines))
+        for key, lines in grouped_move_lines.items():
+                product_id, location_id, lot_ids = key
+                quantity = sum(line.quantity for line in lines if line.quantity)
+                move_ids = [line.move_id.id for line in lines if line.move_id]
+                location_dest_id = lines[0].location_dest_id.id if lines and lines[0].location_dest_id else None
+
+                new_move_data = {
+                    'product_id': product_id.id,
+                    'location_id': location_id.id,
+                    'lot_ids': lot_ids.id if lot_ids else False, 
+                    'quantity': quantity,
+                    'location_dest_id': location_dest_id,
+                    'stock_move_line_ids': [Command.link(id) for id in lines.ids],
+                    'move_ids': [Command.link(id) for id in move_ids],
+                }
+
+                new_move = self.env['keimed.stock.move'].create(new_move_data)
+                wave_vals['move_ids'].append(new_move.id)
+
+<<<<<<< HEAD
         grouped_stock_move_lines = groupby(self, lambda ml: (ml.product_id, ml.location_id, ml.lot_id))
 
         grouped_move_lines = {}
@@ -152,6 +190,10 @@ class StockMoveLine(models.Model):
 
         wave.action_confirm()
         self.write({'is_used_in_wave': True})
+=======
+        wave.write(wave_vals)
+        self.write({'is_stock_move_line_created': True})
+>>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
 
     def generate_pickings(self):
         move_lines = self.browse(self._context.get('active_ids'))
