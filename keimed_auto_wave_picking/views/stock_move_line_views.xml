@@ -12,6 +12,7 @@
                 <field name="keimed_wave_id" column_invisible="True" />
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                 <field name="product_id" readonly="1" />
                 <field name="lot_id" groups="stock.group_production_lot" readonly="tracking not in ['lot', 'serial'] or context.get('checked') or context.get('operation_type') == 'detailed_operation'" domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]" options="{'no_create': True}" />
                 <field name="location_id" readonly="1" context="{'display_only_current_location_name': True}" />
@@ -27,18 +28,22 @@
 >>>>>>> fe0772c ([IMP] pass context according to condition in stock move line tree view)
                 <field name="lot_id" groups="stock.group_production_lot" readonly="context.get('operation_type') == 'detailed_operation'" />
                 <field name="location_id" context="{'display_only_current_location_name': True}" readonly="1"/>
+=======
+                <field name="product_id" readonly="1" />
+                <field name="lot_id" groups="stock.group_production_lot" readonly="tracking not in ['lot', 'serial'] or context.get('checked') or context.get('operation_type') == 'detailed_operation'" domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]" options="{'no_create': True}" />
+                <field name="location_id" readonly="1" context="{'display_only_current_location_name': True}" />
+>>>>>>> a952cd2 ([IMP] action_done function for validation)
                 <field name="location_dest_id" readonly="1" />
-                <field name="picker_id" string="Picker" column_invisible="True" />
-                <field name="package_id" groups="stock.group_tracking_lot" column_invisible="1" />
-                <field name="result_package_id" string="Basket No." groups="stock.group_tracking_lot" readonly="picked" />
-                <field name="product_uom_category_id" column_invisible="True"/>
-                <field name="product_uom_id" options="{'no_create': True}" groups="uom.group_uom" readonly="1" />
                 <field name="quantity" readonly="1" />
-                <field name="to_do" />
+                <field name="product_uom_id" options="{'no_create': True}" groups="uom.group_uom" readonly="1" />
+                <field name="to_do" readonly="context.get('checked') or context.get('operation_type') == 'detailed_operation'" />
                 <field name="company_id" groups="base.group_multi_company" />
+<<<<<<< HEAD
                 <field name="note" readonly="1" />
                 <button name="change_basket_button_action" title="Change Basket" type="object" icon="fa-shopping-basket" column_invisible="context.get('keimed_wave_state') in ['done', 'cancel']" invisible="picked or not result_package_id" groups="stock.group_tracking_lot" />
 >>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
+=======
+>>>>>>> a952cd2 ([IMP] action_done function for validation)
             </tree>
         </field>
     </record>
@@ -64,9 +69,12 @@
                 <field name="to_do" />
                 <field name="company_id" groups="base.group_multi_company" />
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
                 <!-- <button name="picked_button_action" title="Picked" type="object" icon="fa-check" column_invisible="context.get('keimed_wave_state') in ['done', 'cancel']" invisible="picked" /> -->
 >>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+>>>>>>> a952cd2 ([IMP] action_done function for validation)
                 <field name="note" readonly="keimed_wave_id.state != 'done'" />
                 <button name="change_basket_button_action" title="Change Basket" type="object" icon="fa-shopping-basket" column_invisible="context.get('keimed_wave_state') in ['done', 'cancel']" invisible="picked or not result_package_id" groups="stock.group_tracking_lot" />
             </tree>

@@ -34,6 +34,7 @@ class KeimedStockMove(models.Model):
     product_uom_qty = fields.Float(
         string='Demand', digits='Product Unit of Measure',
         default=0, required=True,
+<<<<<<< HEAD
         help="This is the quantity of product that is planned to be moved.")
     product_uom = fields.Many2one('uom.uom', string='UoM', required=True)
 =======
@@ -51,6 +52,8 @@ class KeimedStockMove(models.Model):
         'product.product', string='Product', required=True)
     product_uom_qty = fields.Float(string='Demand',
         digits='Product Unit of Measure', default=0, required=True,
+=======
+>>>>>>> a952cd2 ([IMP] action_done function for validation)
         help="This is the quantity of product that is planned to be moved.")
 <<<<<<< HEAD
     product_uom = fields.Many2one(
@@ -126,6 +129,7 @@ class KeimedStockMove(models.Model):
         compute='_compute_basket_number', inverse='_inverse_basket_number',
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         store=True, copy=False, readonly=False, index=True)
 =======
         store=True, coS00044py=False, readonly=False)
@@ -133,6 +137,9 @@ class KeimedStockMove(models.Model):
 =======
         store=True, copy=False, readonly=False)
 >>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+        store=True, copy=False, readonly=False, index=True)
+>>>>>>> a952cd2 ([IMP] action_done function for validation)
     to_do = fields.Float(
         string='To-Do', compute='_compute_to_do', store=True, copy=False)
     to_do_change_count = fields.Integer(string='To-do count')
@@ -211,6 +218,7 @@ class KeimedStockMove(models.Model):
     def _compute_to_do(self):
         for move in self:
             move.to_do = sum(move.stock_move_line_ids.mapped('to_do'))
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 =======
@@ -220,6 +228,8 @@ class KeimedStockMove(models.Model):
             if not rec.picked and rec.to_do_check:
                 rec.to_do_change_count += 1
                 rec.to_do_check = False
+=======
+>>>>>>> a952cd2 ([IMP] action_done function for validation)
 
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
     @api.depends('stock_move_line_ids', 'stock_move_line_ids.result_package_id')
@@ -285,33 +295,36 @@ class KeimedStockMove(models.Model):
 
 =======
 
-    @api.onchange('to_do')
-    def on_change_to_do(self):
-        if self.to_do < 0.0 or self.to_do > self.product_uom_qty:
-            raise ValidationError(
-                _("The to do quantity must be greater than zero and less than demanded quantity"))
-        else:
-            self.picked = False
-
     def picked_button_action(self):
-        picker_attendances = self.env['picker.attendance'].search([
-            ('location_id', '=', self.location_id.id),
-            ('company_id', '=', self.company_id.id),
-            ('checkin_date', '!=', False),
-            ('checkout_date', '=', False),
-        ])
-        user_ids = picker_attendances.mapped('user_id').ids
+        self.ensure_one()
         if self.keimed_wave_id.is_snake_picking_wave and self.picker_id and self.picker_id.id != self.env.user.id:
             raise ValidationError(
                 _('You can not pick this product. %s is picking this product.', self.picker_id.name))
-        elif self.keimed_wave_id.is_snake_picking_wave and self.env.user.id not in user_ids:
-            raise ValidationError(
-                _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
-        if self.keimed_wave_id.is_snake_picking_wave:
-            move_ids = self.keimed_wave_id.move_ids.filtered(lambda move: move.location_id.id == self.location_id.id)
+
+        elif self.keimed_wave_id.is_snake_picking_wave:
+            user_ids = self.env['picker.attendance'].search([
+                ('location_id', '=', self.location_id.id),
+                ('company_id', '=', self.company_id.id),
+                ('checkin_date', '!=', False),
+                ('checkout_date', '=', False),
+            ]).mapped('user_id').ids
+
+            if self.env.user.id not in user_ids:
+                raise ValidationError(
+                    _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
+
+            move_ids = self.keimed_wave_id.move_ids.filtered(
+                lambda move: move.location_id.id == self.location_id.id)
             for move in move_ids:
                 move.picker_id = self.env.user
+<<<<<<< HEAD
 >>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
+=======
+
+        for line in self.stock_move_line_ids:
+            line.to_do = 0
+
+>>>>>>> a952cd2 ([IMP] action_done function for validation)
         self.write({
             'picked': True,
             'to_do_check': True
@@ -378,24 +391,39 @@ class KeimedStockMove(models.Model):
 =======
 >>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
     def show_stock_move_lines(self):
-        operation_type = 'detailed_operation' if self.env.context.get(
-            'detailed_operation') else 'operation'
-
         return {
             "type": "ir.actions.act_window",
-            "name": "Stock Move Lines",
+            "name": "Detailed Picklist",
             "res_model": "stock.move.line",
             "views": [[self.env.ref(
-                'keimed_auto_wave_picking.stock_move_line_tree_view_as_wizard_keimed_auto_wave_picking').id, "tree"]],
+                'keimed_auto_wave_picking.stock_move_line_tree_view_as_wizard_keimed_auto_wave_picking'
+            ).id, "tree"]],
             "target": "new",
             "domain": [("id", "in", self.stock_move_line_ids.ids)],
             "context": {
                 'default_stock_move_line_ids': self.stock_move_line_ids.ids,
-                'operation_type': operation_type
+                'operation_type': 'detailed_operation' if self.env.context.get(
+                    'detailed_operation') else 'operation',
+                'checked': self.checked,
             }
         }
+<<<<<<< HEAD
 <<<<<<< HEAD
     }
 >>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
 =======
 >>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
+=======
+
+    def action_unlink_move(self):
+        self.ensure_one()
+        self.keimed_wave_id = False
+
+    def action_approve_unlink(self):
+        self.ensure_one()
+        self.unlink()
+
+    def action_reject_unlink(self):
+        self.ensure_one()
+        self.keimed_wave_id = self.stock_move_line_ids.mapped('keimed_wave_id')
+>>>>>>> a952cd2 ([IMP] action_done function for validation)
