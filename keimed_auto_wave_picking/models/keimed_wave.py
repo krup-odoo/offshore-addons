@@ -126,6 +126,16 @@ class KeimedWave(models.Model):
             raise UserError(_(msg))
 
         self.write({'state': 'done'})
+        for wave in self:
+            if wave.checked and wave.picked:
+                picking_ids = wave.move_ids.mapped('stock_move_line_ids.picking_id').filtered(lambda p: p.state == 'assigned')
+                move_lines = picking_ids.move_line_ids.filtered(lambda line: line.is_used_in_wave)
+                all_waves_picked_and_checked = all(
+                    line.keimed_wave_id.picked and 
+                    line.keimed_wave_id.checked for line in picking_ids.move_line_ids
+                )
+                if move_lines and all_waves_picked_and_checked:
+                    picking_ids.button_validate()
         return True
 
     def action_cancel(self):

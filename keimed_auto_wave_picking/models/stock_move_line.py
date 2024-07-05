@@ -189,6 +189,7 @@ class StockMoveLine(models.Model):
                 'stock_move_line_ids': [Command.link(line.id) for line in lines],
                 'move_ids': [Command.link(move.id) for move in lines.mapped('move_id')],
             }))
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -218,6 +219,9 @@ class StockMoveLine(models.Model):
                 'move_ids': [Command.link(move.id) for move in lines.mapped('move_id')],
             }))
 
+=======
+            lines.write({'keimed_wave_id': wave.id})
+>>>>>>> 48ddf3f ([IMP] action_done function for validation)
         if keimed_moves:
             wave_vals['move_ids'] = keimed_moves
         wave.write(wave_vals)
