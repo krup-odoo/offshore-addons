@@ -19,9 +19,10 @@ class KeimedStockMove(models.Model):
     company_id = fields.Many2one(
         'res.company', string='Company', required=True)
     product_id = fields.Many2one(
-        'product.product', string='Product', required=True)
-    product_uom_qty = fields.Float(string='Demand',
-        digits='Product Unit of Measure', default=0, required=True,
+        'product.product', string='Product', required=True, index=True)
+    product_uom_qty = fields.Float(
+        string='Demand', digits='Product Unit of Measure',
+        default=0, required=True,
         help="This is the quantity of product that is planned to be moved.")
     product_uom = fields.Many2one('uom.uom', string='UoM', required=True)
     product_uom_category_id = fields.Many2one(
@@ -65,7 +66,7 @@ class KeimedStockMove(models.Model):
         related='product_id.detailed_type', readonly=True)
     lot_ids = fields.Many2many(
         'stock.lot', compute='_compute_lot_ids', store=True,
-        string='Lot Numbers')
+        string='Lot Numbers', index=True)
     show_quant = fields.Boolean("Show Quant", compute="_compute_show_info")
     show_lots_m2o = fields.Boolean("Show lot_id", compute="_compute_show_info")
     show_lots_text = fields.Boolean(
@@ -75,13 +76,14 @@ class KeimedStockMove(models.Model):
     basket_number_id = fields.Many2one(
         "stock.quant.package", string='Basket No.',
         compute='_compute_basket_number', inverse='_inverse_basket_number',
-        store=True, copy=False, readonly=False)
+        store=True, copy=False, readonly=False, index=True)
     to_do = fields.Float(
         string='To-Do', compute='_compute_to_do', store=True, copy=False)
     to_do_change_count = fields.Integer(string='To-do count')
     to_do_check = fields.Boolean(default=True)
     picker_id = fields.Many2one(
-        'res.users', compute='_compute_picker', store=True, copy=False)
+        'res.users', compute='_compute_picker', store=True, copy=False,
+        index=True)
     note = fields.Text(string='Note')
 
     @api.depends('stock_move_line_ids.quantity')
@@ -205,3 +207,15 @@ class KeimedStockMove(models.Model):
                 'checked': self.checked,
             }
         }
+
+    def action_unlink_move(self):
+        self.ensure_one()
+        self.keimed_wave_id = False
+
+    def action_approve_unlink(self):
+        self.ensure_one()
+        self.unlink()
+
+    def action_reject_unlink(self):
+        self.ensure_one()
+        self.keimed_wave_id = self.stock_move_line_ids.mapped('keimed_wave_id')

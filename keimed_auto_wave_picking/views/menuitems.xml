@@ -2,4 +2,6 @@
 <odoo>
     <menuitem action="action_keimed_wave" id="keimed_wave_menu" parent="stock.menu_stock_transfers" sequence="32" groups="keimed_auto_wave_picking.group_stock_picking_picker,keimed_auto_wave_picking.group_stock_picking_checker" />
     <menuitem action="action_keimed_snake_picking" id="keimed_snake_picking_menu" parent="stock.menu_stock_transfers" sequence="33" groups="keimed_auto_wave_picking.group_stock_picking_picker,keimed_auto_wave_picking.group_stock_picking_checker" />
+    <menuitem id="menu_keimed_wave_config" name="Wave Management" parent="stock.menu_stock_config_settings" groups="stock.group_stock_manager" sequence="1" />
+    <menuitem id="menu_keimed_move_approval" name="Move Approval" sequence="1" parent="keimed_auto_wave_picking.menu_keimed_wave_config" action="action_keimed_move_approval" />
 </odoo>

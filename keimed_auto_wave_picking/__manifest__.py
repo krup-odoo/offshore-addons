@@ -38,6 +38,7 @@
         'views/stock_move_views.xml',
 
         'views/keimed_wave_views.xml',
+        'views/keimed_stock_move_views.xml',
         'views/menuitems.xml',
     ],
 

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="keimed_stock_move_tree_view" model="ir.ui.view">
+        <field name="name">keimed.stock.move.view.tree</field>
+        <field name="model">keimed.stock.move</field>
+        <field name="arch" type="xml">
+            <tree string="Keimed Stock Move" sample="1" create="0" edit="0" delete="0">
+                <field name="product_id" />
+                <field name="basket_number_id" />
+                <field name="picker_id" widget="many2one_avatar_user" string="Picker" />
+                <field name="product_uom_qty" />
+                <field name="picked" />
+                <field name="checked" />
+                <field name="to_do" />
+                <field name="product_uom" />
+                <field name="to_do_change_count" />
+                <field name="note" />
+                <field name="company_id" groups="base.group_multi_company" />
+                <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'detailed_operation': True}" />
+                <button name="action_approve_unlink" string="Approve" type="object" class="btn-success" />
+                <button name="action_reject_unlink" string="Reject" type="object" class="btn-danger" />
+            </tree>
+        </field>
+    </record>
+    <record id="action_keimed_move_approval" model="ir.actions.act_window">
+        <field name="name">Move Apporval</field>
+        <field name="res_model">keimed.stock.move</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('keimed_wave_id', '=', False)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Nothing to approve!
+            </p>
+        </field>
+    </record>
+</odoo>

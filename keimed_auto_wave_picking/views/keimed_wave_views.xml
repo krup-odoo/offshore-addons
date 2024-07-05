@@ -95,6 +95,7 @@
                                     <field name="note" readonly="1" />
                                     <button name="checked_button_action" title="Checked" type="object" icon="fa-check" column_invisible="parent.state in ['done', 'cancel']" invisible="checked" />
                                     <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'operations': True}" />
+                                    <button name="action_unlink_move" title="Unlink" type="object" icon="fa-solid fa-trash" column_invisible="parent.state in ['done', 'cancel']" />
                                 </tree>
                             </field>
                         </page>
@@ -230,6 +231,7 @@
                                     <field name="note" readonly="1" />
                                     <button name="checked_button_action" title="Checked" type="object" icon="fa-check" column_invisible="parent.state in ['done', 'cancel']" invisible="checked" />
                                     <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'operations': True}" />
+                                    <button name="action_unlink_move" title="Unlink" type="object" icon="fa-solid fa-trash" column_invisible="parent.state in ['done', 'cancel']" />
                                 </tree>
                             </field>
                         </page>
