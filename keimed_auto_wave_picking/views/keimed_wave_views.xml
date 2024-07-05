@@ -72,15 +72,7 @@
                                     <field name="note" readonly="checked" />
                                     <button name="picked_button_action" title="Picked" type="object" icon="fa-check" column_invisible="parent.state in ['done', 'cancel']" invisible="picked" />
                                     <button name="change_basket_button_action" title="Change Basket" type="object" icon="fa-shopping-basket" column_invisible="parent.state in ['done', 'cancel']" invisible="picked or not basket_number_id" groups="stock.group_tracking_lot" />
-<<<<<<< HEAD
-<<<<<<< HEAD
                                     <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'detailed_operation': True}" />
-=======
-                                    <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'detailed_operation': True}"/>
->>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
-=======
-                                    <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'detailed_operation': True}" />
->>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
                                 </tree>
                             </field>
                         </page>
@@ -102,19 +94,8 @@
                                     <field name="to_do_change_count" readonly="1" />
                                     <field name="note" readonly="1" />
                                     <button name="checked_button_action" title="Checked" type="object" icon="fa-check" column_invisible="parent.state in ['done', 'cancel']" invisible="checked" />
-<<<<<<< HEAD
-<<<<<<< HEAD
                                     <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'operations': True}" />
                                     <button name="action_unlink_move" title="Unlink" type="object" icon="fa-solid fa-trash" column_invisible="parent.state in ['done', 'cancel']" />
-<<<<<<< HEAD
-=======
-                                    <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'operations': True}"/>
->>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
-=======
-                                    <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'operations': True}" />
->>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
-=======
->>>>>>> a952cd2 ([IMP] action_done function for validation)
                                 </tree>
                             </field>
                         </page>
@@ -250,14 +231,7 @@
                                     <field name="note" readonly="1" />
                                     <button name="checked_button_action" title="Checked" type="object" icon="fa-check" column_invisible="parent.state in ['done', 'cancel']" invisible="checked" />
                                     <button name="show_stock_move_lines" title="Stock Move Lines" type="object" icon="fa-solid fa-list" context="{'operations': True}" />
-<<<<<<< HEAD
-<<<<<<< HEAD
                                     <button name="action_unlink_move" title="Unlink" type="object" icon="fa-solid fa-trash" column_invisible="parent.state in ['done', 'cancel']" />
-=======
->>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
-=======
-                                    <button name="action_unlink_move" title="Unlink" type="object" icon="fa-solid fa-trash" column_invisible="parent.state in ['done', 'cancel']" />
->>>>>>> a952cd2 ([IMP] action_done function for validation)
                                 </tree>
                             </field>
                         </page>

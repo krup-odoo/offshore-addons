@@ -26,29 +26,11 @@ class StockMoveLine(models.Model):
         related='picking_id.scheduled_date')
     priority = fields.Selection(
         related='picking_id.priority', string='Priority', store=True)
-<<<<<<< HEAD
-<<<<<<< HEAD
     to_do = fields.Float(string='To-Do', copy=False)
     picker_id = fields.Many2one(
         'res.users', compute='_compute_picker', store=True)
     note = fields.Text(string='Note')
     is_used_in_wave = fields.Boolean(string='Is Used In Wave')
-=======
-    to_do = fields.Float(
-        string='To-Do', copy=False)
-    user_id = fields.Many2one(
-=======
-    to_do = fields.Float(string='To-Do', copy=False)
-    picker_id = fields.Many2one(
->>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
-        'res.users', compute='_compute_picker', store=True)
-    note = fields.Text(string='Note')
-<<<<<<< HEAD
-    is_stock_move_line_created = fields.Boolean(string='Is Stock Move Line Created')
->>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
-=======
-    is_used_in_wave = fields.Boolean(string='Is Used In Wave')
->>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
 
     @api.depends('location_id', 'company_id')
     def _compute_picker(self):
@@ -65,40 +47,6 @@ class StockMoveLine(models.Model):
                 if picker_attendance:
                     user = picker_attendance.user_id
             rec.picker_id = user
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-    @api.onchange('to_do')
-    def on_change_to_do(self):
-        if self.to_do < 0.0 or self.to_do > self.quantity:
-            raise ValidationError(
-<<<<<<< HEAD
-                _("The to do quantity must be greater than zero and less than demanded quantity"))
-=======
-                _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
-        self.picked = True
-        self.move_ids.write({
-            'to_do': 0,
-            'to_do_check': True
-        })
-        if self.move_ids and all(line.picked for line in self.keimed_wave_id.stock_move_line_ids.filtered(lambda x: x.move_ids == self.move_ids)):
-            self.move_ids.picked = True
->>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
-=======
-    # def picked_button_action(self):
-    #     if self.keimed_wave_id.is_snake_picking_wave and self.user_id != self.env.user:
-    #         raise ValidationError(
-    #             _('You can not pick this product. You can only pick the products, where you are assigned as a picker.'))
-    #     self.picked = True
-    #     self.move_ids.write({
-    #         'to_do': 0,
-    #         'to_do_check': True
-    #     })
-    #     if self.move_ids and all(line.picked for line in self.keimed_wave_id.stock_move_line_ids.filtered(lambda x: x.move_ids == self.move_ids)):
-    #         self.move_ids.picked = True
->>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
-=======
->>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
 
     @api.onchange('to_do')
     def on_change_to_do(self):
@@ -137,35 +85,12 @@ class StockMoveLine(models.Model):
             'context': {'default_no_of_lines_to_be_picked': len(self)},
         }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    def create_keimed_stock_move(self, move):
-        return self.env['keimed.stock.move'].create({
-            'move_ids': move.ids.id,
-            'location_id': move.location_id.id,
-            'location_dest_id': move.location_dest_id.id,
-            'product_uom_qty': move.product_uom_qty.id,
-            'product_uom': move.product_uom.id,
-            'stock_move_line_ids': [Command.link(id) for id in self.ids],
-        })
-
->>>>>>> b073b80 ([IMP] added wizard for stock move lines, calculated quantity and changed relational field)
-=======
->>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
     def _add_to_keimed_wave(self):
         wave = self.env['keimed.wave'].create({
             'picker_id': self._context.get('active_owner_id'),
             'is_snake_picking_wave': self._context.get('is_snake_picking'),
         })
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
->>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
-=======
-
->>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
         wave_vals = {
             'move_ids': [],
         }
@@ -195,39 +120,7 @@ class StockMoveLine(models.Model):
                 'stock_move_line_ids': [Command.link(line.id) for line in lines],
                 'move_ids': [Command.link(move.id) for move in lines.mapped('move_id')],
             }))
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-        grouped_stock_move_lines = groupby(self, lambda ml: (ml.product_id, ml.location_id, ml.lot_id))
-
-        grouped_move_lines = {}
-        StockMoveLine = self.env['stock.move.line']
-        for key, move_lines in grouped_stock_move_lines:
-            grouped_move_lines[key] = StockMoveLine.concat(*list(move_lines))
-
-        keimed_moves = []
-        for key, lines in grouped_move_lines.items():
-            product_id, location_id, lot_ids = key
-            quantity = sum(lines.mapped('quantity'))
-            location_dest_id = lines[0].location_dest_id.id if lines and lines[0].location_dest_id else None
-
-            keimed_moves.append(Command.create({
-                'product_id': product_id.id,
-                'company_id': self.company_id.id,
-                'product_uom': product_id.uom_id.id,
-                'product_uom_qty': quantity,
-                'location_id': location_id.id,
-                'lot_ids': [Command.link(lot.id) for lot in lot_ids],
-                # 'quantity': quantity,
-                'location_dest_id': location_dest_id,
-                'stock_move_line_ids': [Command.link(line.id) for line in lines],
-                'move_ids': [Command.link(move.id) for move in lines.mapped('move_id')],
-            }))
-
-=======
             lines.write({'keimed_wave_id': wave.id})
->>>>>>> 48ddf3f ([IMP] action_done function for validation)
         if keimed_moves:
             wave_vals['move_ids'] = keimed_moves
         wave.write(wave_vals)
@@ -237,28 +130,6 @@ class StockMoveLine(models.Model):
 
         wave.action_confirm()
         self.write({'is_used_in_wave': True})
-=======
-        wave.write(wave_vals)
-        self.write({'is_stock_move_line_created': True})
-<<<<<<< HEAD
->>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
-=======
-        # if self._context.get('is_snake_picking'):
-        #     wave.move_ids._compute_picker()
-        # wave.action_confirm()
-
->>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
-=======
-        if keimed_moves:
-            wave_vals['move_ids'] = keimed_moves
-        wave.write(wave_vals)
-
-        if self._context.get('is_snake_picking'):
-            wave.move_ids._compute_picker()
-
-        wave.action_confirm()
-        self.write({'is_used_in_wave': True})
->>>>>>> b5c9dff ([IMP] pass context according to condition in stock move line tree view)
 
     def generate_pickings(self):
         move_lines = self.browse(self._context.get('active_ids'))

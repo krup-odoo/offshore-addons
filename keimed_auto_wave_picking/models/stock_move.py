@@ -63,40 +63,8 @@ class StockMove(models.Model):
         self.to_do = 0.0
 
         move_lines = self.keimed_wave_id.stock_move_line_ids.filtered(
-<<<<<<< HEAD
-<<<<<<< HEAD
             lambda x: x.move_id == self and not x.picked)
-=======
-            lambda x: x.move_ids == self and not x.picked)
->>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
-=======
-            lambda x: x.move_id == self and not x.picked)
->>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
         if move_lines:
             move_lines.write({
                 'picked': True
             })
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-    def create_keimed_stock_move(self, move_lines):
-        return self.env['keimed.stock.move'].create({
-            'move_ids': self.id,
-            'location_id': self.location_id.id,
-            'location_dest_id': self.location_dest_id.id,
-            'stock_move_line_ids': [Command.create({
-                'move_line_id': line.id,
-                'company_id': line.company_id.id,
-                'product_id': line.product_id.id,
-                'quantity': line.quantity,
-                'lot_id': line.lot_id.id,
-                'package_id': line.package_id.id,
-                'result_package_id': line.result_package_id.id,
-                'location_id': line.location_id.id,
-                'location_dest_id': line.location_dest_id.id,
-            }) for line in move_lines]
-        })
->>>>>>> d2464fb ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
-=======
->>>>>>> 906badd ([IMP] remove keimed stockmove line modal, changing the fields according to requirment)
